@@ -13,7 +13,7 @@ all: build
 build: $(OUTNAME)
 
 clean:
-	rm *.o $(OUTNAME)
+	rm -f *.o $(OUTNAME)
 
 docs:
 	doxygen

@@ -8,6 +8,7 @@
 #ifndef _SIMULATION_H
 #define _SIMULATION_H
 
+#include <iostream>
 #include <random>
 
 /// Elementary charge (in C).
@@ -63,7 +64,7 @@ constexpr double IRRADIATION_FACTOR = 1e-10;
  * frequency. The default values are taken from a fit performed on data from
  * the April 2016 cooldown.
  */
-struct fit_parameters {
+struct FitParameters {
     /// The height of the distributions.
     double a = 0.545266;
     /// The standard deviation.
@@ -75,12 +76,28 @@ struct fit_parameters {
 };
 
 /**
+ * @brief A single observable data point.
+ *
+ * Each data point contains all observable data at a particular time.
+ */
+struct Data {
+    double t, pn, pe, freq, c, temperature, dose;
+
+    /**
+     * @brief Outputs the data in standard CSV format.
+     *
+     * This will be `time, pn, freq`.
+     */
+    friend std::ostream &operator<<(std::ostream &out, const Data &data);
+};
+
+/**
  * @brief The simulation for spin 1/2.
  */
 class Simulation
 {
     /// The fit parameters currently in use.
-    fit_parameters fit_params;
+    FitParameters fit_params;
 
     double t1n = 25 * 60;
     double t1e = 0.03;
@@ -119,6 +136,11 @@ class Simulation
      * @param freq The initial frequency.
      */
     Simulation(double freq);
+
+    /**
+     * @brief Returns observable data readings.
+     */
+    Data take_data();
     /**
      * @brief Sets the frequency.
      *

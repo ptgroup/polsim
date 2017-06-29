@@ -1,8 +1,15 @@
 #include "simulation.hpp"
 
 #include <cmath>
+#include <iostream>
 
 using namespace std;
+
+std::ostream &operator<<(std::ostream &out, const Data &data)
+{
+    // Output in the standard CSV format
+    return out << (int64_t)data.t << "," << data.pn << "," << data.freq;
+}
 
 Simulation::Simulation(double freq)
 {
@@ -11,6 +18,12 @@ Simulation::Simulation(double freq)
     this->set_temperature(this->system_temperature);
     this->calc_transition_rates();
     this->rng.seed(random_device{}());
+}
+
+Data Simulation::take_data()
+{
+    return {this->t, this->pn,          this->pe,  this->freq,
+            this->c, this->temperature, this->dose};
 }
 
 void Simulation::set_freq(double frequency)
@@ -31,7 +44,8 @@ void Simulation::beam_off() { this->beam_current = 0; }
 
 void Simulation::run_for(double t, double step)
 {
-    while (this->t < t)
+    const double END_T = this->t + t;
+    while (this->t < END_T)
         this->time_step(step);
 }
 
