@@ -1,6 +1,6 @@
 #include "pdp.hpp"
 
-Pdp::Pdp(Simulation &&sim, unsigned n_sweeps) : sim(sim), n_sweeps(n_sweeps)
+Pdp::Pdp(Simulation sim, unsigned n_sweeps) : sim(sim), n_sweeps(n_sweeps)
 {
     this->rng.seed(std::random_device{}());
 }
@@ -18,6 +18,12 @@ Data Pdp::take_data()
     data.pn = pn;
     return data;
 }
+
+void Pdp::set_freq(double freq) { this->sim.set_freq(freq); }
+
+void Pdp::beam_on(double current) { this->sim.beam_on(current); }
+
+void Pdp::beam_off() { this->sim.beam_off(); }
 
 Data Pdp::sweep()
 {

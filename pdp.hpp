@@ -39,7 +39,7 @@ class Pdp
      * @param sim The underlying simulation.
      * @param n_sweeps The number of sweeps per data reading.
      */
-    Pdp(Simulation &&sim, unsigned n_sweeps = 250);
+    Pdp(Simulation sim, unsigned n_sweeps = 250);
 
     /**
      * @brief Gets a single data point by sweeping.
@@ -53,6 +53,22 @@ class Pdp
      * sweeping.
      */
     Data take_data();
+    /**
+     * @brief Sets the frequency of the underlying simulation.
+     *
+     * @param freq The new frequency.
+     */
+    void set_freq(double freq);
+    /**
+     * @brief Turns the beam on with the given current.
+     *
+     * @param current The beam current (in nA).
+     */
+    void beam_on(double current);
+    /**
+     * @brief Turns the beam off.
+     */
+    void beam_off();
 
   private:
     /**
