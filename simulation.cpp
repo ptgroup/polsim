@@ -44,8 +44,8 @@ void Simulation::beam_off() { this->beam_current = 0; }
 
 void Simulation::run_for(double t, double step)
 {
-    const double END_T = this->t + t;
-    while (this->t < END_T)
+    const double end_t = this->t + t;
+    while (this->t < end_t)
         this->time_step(step);
 }
 
@@ -89,17 +89,17 @@ void Simulation::set_temperature(double temperature)
 void Simulation::time_step(double t)
 {
     // Parameters for temperature change (exponential growth/decay)
-    // TEMP_SS = steady-state temperature
-    // K_TEMP = rate of exponential increase
+    // temp_ss = steady-state temperature
+    // k_temp = rate of exponential increase
     // If we're annealing, we shouldn't allow the temperature to change (assume
     // anneals occur at constant temperature)
-    const double K_TEMP = 0.01;
-    const double TEMP_SS = this->system_temperature + this->beam_current / 100;
+    const double k_temp = 0.01;
+    const double temp_ss = this->system_temperature + this->beam_current / 100;
 
     // Increase phi according to some exponential growth when the beam is on
     // Parameters are similar to those for temperature change
-    const double K_PHI = this->beam_current / 1e7;
-    const double PHI_SS = 0.001;
+    const double k_phi = this->beam_current / 1e7;
+    const double phi_ss = 0.001;
 
     // Calculate convenience constants
     const double A = this->t1e / this->t1n -
@@ -109,28 +109,28 @@ void Simulation::time_step(double t)
     const double D = -1 - (this->alpha + this->beta) / 2;
 
     // Calculate rates
-    const double PN_PRIME = (A * this->pn_raw + B * this->pe) / this->t1e;
-    const double PE_PRIME =
+    const double pn_prime = (A * this->pn_raw + B * this->pe) / this->t1e;
+    const double pe_prime =
         (C * this->pn_raw + D * this->pe + this->pe0) / this->t1e;
 
     // Update pn and pe using Euler's method
-    this->pn_raw += PN_PRIME * t;
-    this->pe += PE_PRIME * t;
+    this->pn_raw += pn_prime * t;
+    this->pe += pe_prime * t;
     // Update temperature and phi
     this->set_temperature(this->temperature +
-                          t * K_TEMP * (TEMP_SS - this->temperature));
-    this->phi += t * K_PHI * (PHI_SS - this->phi);
+                          t * k_temp * (temp_ss - this->temperature));
+    this->phi += t * k_phi * (phi_ss - this->phi);
     // Update C
     this->c += IRRADIATION_FACTOR * this->beam_current * t;
 
     // Update dose, along with the fit parameters M1 and M2, which depend on it.
     // Recall the exponential change of M1 and M2 described in the
     // documentation.
-    const double DELTA_DOSE = (this->beam_current * 1e-9 / ELEM_CHARGE) * t;
+    const double delta_dose = (this->beam_current * 1e-9 / ELEM_CHARGE) * t;
     this->fit_params.m1 +=
-        FIT_M1_COEFF * FIT_M1_RATE * DELTA_DOSE * exp(FIT_M1_RATE * this->dose);
+        FIT_M1_COEFF * FIT_M1_RATE * delta_dose * exp(FIT_M1_RATE * this->dose);
     this->fit_params.m2 +=
-        FIT_M2_COEFF * FIT_M2_RATE * DELTA_DOSE * exp(FIT_M2_RATE * this->dose);
+        FIT_M2_COEFF * FIT_M2_RATE * delta_dose * exp(FIT_M2_RATE * this->dose);
     this->dose += (this->beam_current * 1e-9 / ELEM_CHARGE) * t;
 
     // Calculate new transition rates
@@ -151,16 +151,16 @@ void Simulation::update_transition_rates()
 std::pair<double, double> Simulation::calc_transition_rates(double freq) const
 {
     // Calculate from the Gaussian distributions
-    const double SCALE =
+    const double scale =
         this->fit_params.a / (sqrt(2 * PI) * this->fit_params.s);
-    const double DIFF1 = freq - this->fit_params.m1;
-    const double DIFF2 = freq - this->fit_params.m2;
-    const double EXP1 =
-        exp(-DIFF1 * DIFF1 / (2 * this->fit_params.s * this->fit_params.s));
-    const double EXP2 =
-        exp(-DIFF2 * DIFF2 / (2 * this->fit_params.s * this->fit_params.s));
+    const double diff1 = freq - this->fit_params.m1;
+    const double diff2 = freq - this->fit_params.m2;
+    const double exp1 =
+        exp(-diff1 * diff1 / (2 * this->fit_params.s * this->fit_params.s));
+    const double exp2 =
+        exp(-diff2 * diff2 / (2 * this->fit_params.s * this->fit_params.s));
 
-    return std::make_pair(SCALE * EXP2, SCALE * EXP1);
+    return std::make_pair(scale * exp2, scale * exp1);
 }
 
 double Simulation::pn_noisy()
