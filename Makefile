@@ -2,9 +2,9 @@ CXX ?= clang++
 CXXFLAGS ?= -O2 -g
 OUTNAME ?= polsim
 
-CXXFLAGS := $(CXXFLAGS) -std=c++14 -Wall -Werror
+CXXFLAGS := $(CXXFLAGS) -std=c++14 -Wall -Wextra -Werror
 
-OBJS = main.o simulation.o
+OBJS = main.o pdp.o simulation.o
 
 .PHONY: all build clean docs
 

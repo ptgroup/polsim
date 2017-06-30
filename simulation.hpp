@@ -5,8 +5,8 @@
  * @author Ian Johnson
  * @date June 29, 2017
  */
-#ifndef _SIMULATION_H
-#define _SIMULATION_H
+#ifndef _SIMULATION_HPP
+#define _SIMULATION_HPP
 
 #include <iostream>
 #include <random>

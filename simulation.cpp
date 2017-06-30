@@ -56,7 +56,7 @@ void Simulation::anneal(double t, double temperature)
     // Maybe change T1n?
     this->t1n *= 0.8;
 
-    double temp_tmp = this->system_temperature;
+    auto temp_tmp = this->system_temperature;
     this->set_system_temperature(temperature);
     this->run_for(t);
     this->set_system_temperature(temp_tmp);
@@ -142,7 +142,7 @@ void Simulation::calc_transition_rates()
 
 double Simulation::pn_noisy()
 {
-    uniform_real_distribution<double> dist(-1, 1);
+    auto dist = uniform_real_distribution<double>{-1, 1};
     const double THERMAL_NOISE = THERMAL_RANDOMNESS * dist(this->rng);
     const double UNIFORM_NOISE = BASE_RANDOMNESS * dist(this->rng);
 
