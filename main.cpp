@@ -6,15 +6,19 @@
 
 int main(int argc, char **argv)
 {
-    auto controller = StandardController<4>{Pdp{Simulation{140.2}}};
+    using std::cout;
+    using std::endl;
 
-    for (int i = 0; i < 10; i++) {
-        std::cout << controller.step() << std::endl;
-    }
+    auto controller = StandardController<4>{Pdp{Simulation{140.0}}};
+    auto perfect = PerfectController{Pdp{Simulation{140.0}}};
 
-    auto sim = Simulation{140.2};
-    std::cout << sim.find_optimal_freq() << std::endl;
-    std::cout << sim.find_optimal_freq(true) << std::endl;
+    cout << "Perfect:" << endl;
+    for (auto i = 0; i < 40; i++)
+        cout << perfect.step() << endl;
+
+    cout << "Standard:" << endl;
+    for (auto i = 0; i < 10; i++)
+        cout << controller.step() << endl;
 
     return 0;
 }

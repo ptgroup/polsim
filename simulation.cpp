@@ -62,7 +62,7 @@ void Simulation::anneal(double t, double temperature)
     this->set_system_temperature(temp_tmp);
 }
 
-double Simulation::find_optimal_freq(bool negative)
+double Simulation::find_optimal_freq(bool negative) const
 {
     using boost::math::tools::brent_find_minima;
 
@@ -148,7 +148,7 @@ void Simulation::update_transition_rates()
     this->beta = rates.second;
 }
 
-std::pair<double, double> Simulation::calc_transition_rates(double freq)
+std::pair<double, double> Simulation::calc_transition_rates(double freq) const
 {
     // Calculate from the Gaussian distributions
     const double SCALE =
@@ -172,7 +172,7 @@ double Simulation::pn_noisy()
     return this->pn_raw * (1 + THERMAL_NOISE) + UNIFORM_NOISE;
 }
 
-double Simulation::steady_state(double freq)
+double Simulation::steady_state(double freq) const
 {
     auto rates = this->calc_transition_rates(freq);
     auto alpha = rates.first;

@@ -19,6 +19,8 @@ Data Pdp::take_data()
     return data;
 }
 
+const Simulation &Pdp::sim_ref() const { return this->sim; }
+
 void Pdp::set_freq(double freq) { this->sim.set_freq(freq); }
 
 void Pdp::beam_on(double current) { this->sim.beam_on(current); }

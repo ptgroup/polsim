@@ -197,7 +197,7 @@ class Simulation
      * polarization.
      * @return The optimal frequency.
      */
-    double find_optimal_freq(bool negative = false);
+    double find_optimal_freq(bool negative = false) const;
 
   private:
     /**
@@ -225,7 +225,7 @@ class Simulation
      * @param freq The frequency at which to calculate the parameters.
      * @return The transition rates alpha and beta as a std::pair.
      */
-    std::pair<double, double> calc_transition_rates(double freq);
+    std::pair<double, double> calc_transition_rates(double freq) const;
     /**
      * @brief Returns the polarization after taking into account thermal
      * fluctuations.
@@ -239,7 +239,7 @@ class Simulation
      * @param freq The frequency at which to calculate the steady state.
      * @return The steady state polarization.
      */
-    double steady_state(double freq);
+    double steady_state(double freq) const;
 };
 
 #endif

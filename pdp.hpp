@@ -54,6 +54,12 @@ class Pdp
      */
     Data take_data();
     /**
+     * @brief Returns a reference to the underlying simulation.
+     *
+     * @return A reference to the underlying simulation.
+     */
+    const Simulation &sim_ref() const;
+    /**
      * @brief Sets the frequency of the underlying simulation.
      *
      * @param freq The new frequency.

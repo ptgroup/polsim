@@ -87,4 +87,21 @@ class StandardController : public Controller
 
 #include "StandardController.tpp"
 
+/**
+ * @brief A perfect motor controller.
+ *
+ * This motor controller uses knowledge of the optimal frequency at every point
+ * to conduct a perfect seek. Note that this is not possible in the real world
+ * without making the assumption that every system will behave exactly like this
+ * simulation (and it also uses some parameters that would not be measurable in
+ * any case).
+ */
+class PerfectController : public Controller
+{
+  public:
+    PerfectController(Pdp pdp, bool seek_positive = true);
+
+    Data step() override;
+};
+
 #endif
