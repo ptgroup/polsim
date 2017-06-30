@@ -3,8 +3,6 @@
 #include <cmath>
 #include <iostream>
 
-using namespace std;
-
 std::ostream &operator<<(std::ostream &out, const Data &data)
 {
     // Output in the standard CSV format
@@ -17,7 +15,7 @@ Simulation::Simulation(double freq)
     // Make sure pe0 gets initialized
     this->set_temperature(this->system_temperature);
     this->calc_transition_rates();
-    this->rng.seed(random_device{}());
+    this->rng.seed(std::random_device{}());
 }
 
 Data Simulation::take_data()
@@ -142,7 +140,7 @@ void Simulation::calc_transition_rates()
 
 double Simulation::pn_noisy()
 {
-    auto dist = uniform_real_distribution<double>{-1, 1};
+    auto dist = std::uniform_real_distribution<double>{-1, 1};
     const double THERMAL_NOISE = THERMAL_RANDOMNESS * dist(this->rng);
     const double UNIFORM_NOISE = BASE_RANDOMNESS * dist(this->rng);
 

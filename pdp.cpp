@@ -1,10 +1,8 @@
 #include "pdp.hpp"
 
-using namespace std;
-
 Pdp::Pdp(Simulation &&sim, unsigned n_sweeps) : sim(sim), n_sweeps(n_sweeps)
 {
-    this->rng.seed(random_device{}());
+    this->rng.seed(std::random_device{}());
 }
 
 Data Pdp::take_data()
@@ -27,7 +25,7 @@ Data Pdp::sweep()
     auto sweep_data = this->sim.take_data();
 
     // Fuzz polarization
-    auto dist = uniform_real_distribution<double>{-1, 1};
+    auto dist = std::uniform_real_distribution<double>{-1, 1};
     sweep_data.pn += SWEEP_UNCERTAINTY * dist(rng);
     return sweep_data;
 }
