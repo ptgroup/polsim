@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <random>
+#include <utility>
 
 /// Elementary charge (in C).
 constexpr double ELEM_CHARGE = 1.602176662e-19;
@@ -189,6 +190,14 @@ class Simulation
      * @param temperature The temperature at which to anneal (in K).
      */
     void anneal(double t, double temperature);
+    /**
+     * @brief Attempts to find the optimal polarization frequency.
+     *
+     * @param negative Whether to find the optimal frequency for negative
+     * polarization.
+     * @return The optimal frequency.
+     */
+    double find_optimal_freq(bool negative = false);
 
   private:
     /**
@@ -207,14 +216,30 @@ class Simulation
      */
     void time_step(double t);
     /**
-     * @brief Calculates the parameters alpha and beta.
+     * @brief Updates the parameters alpha and beta.
      */
-    void calc_transition_rates();
+    void update_transition_rates();
+    /**
+     * @brief Calculates the parameters alpha and beta at the given frequency.
+     *
+     * @param freq The frequency at which to calculate the parameters.
+     * @return The transition rates alpha and beta as a std::pair.
+     */
+    std::pair<double, double> calc_transition_rates(double freq);
     /**
      * @brief Returns the polarization after taking into account thermal
      * fluctuations.
      */
     double pn_noisy();
+    /**
+     * @brief Calculates the steady state at the given frequency.
+     *
+     * This will use the current internal fit parameters.
+     *
+     * @param freq The frequency at which to calculate the steady state.
+     * @return The steady state polarization.
+     */
+    double steady_state(double freq);
 };
 
 #endif

@@ -12,5 +12,9 @@ int main(int argc, char **argv)
         std::cout << controller.step() << std::endl;
     }
 
+    auto sim = Simulation{140.2};
+    std::cout << sim.find_optimal_freq() << std::endl;
+    std::cout << sim.find_optimal_freq(true) << std::endl;
+
     return 0;
 }

@@ -3,6 +3,8 @@
 #include <cmath>
 #include <iostream>
 
+#include <boost/math/tools/minima.hpp>
+
 std::ostream &operator<<(std::ostream &out, const Data &data)
 {
     // Output in the standard CSV format
@@ -14,7 +16,7 @@ Simulation::Simulation(double freq)
     this->set_freq(freq);
     // Make sure pe0 gets initialized
     this->set_temperature(this->system_temperature);
-    this->calc_transition_rates();
+    this->update_transition_rates();
     this->rng.seed(std::random_device{}());
 }
 
@@ -28,7 +30,7 @@ void Simulation::set_freq(double frequency)
 {
     this->freq = frequency;
     // Make sure transition rates get updated
-    this->calc_transition_rates();
+    this->update_transition_rates();
 }
 
 void Simulation::set_system_temperature(double temperature)
@@ -58,6 +60,23 @@ void Simulation::anneal(double t, double temperature)
     this->set_system_temperature(temperature);
     this->run_for(t);
     this->set_system_temperature(temp_tmp);
+}
+
+double Simulation::find_optimal_freq(bool negative)
+{
+    using boost::math::tools::brent_find_minima;
+
+    // There's only a function to find the minimum, so we'll need to adjust our
+    // lambda for negative versus positive polarization
+    auto min = negative
+                   ? brent_find_minima(
+                         [&](double freq) { return this->steady_state(freq); },
+                         139.0, 141.0, 20)
+                   : brent_find_minima(
+                         [&](double freq) { return -this->steady_state(freq); },
+                         139.0, 141.0, 20);
+
+    return min.first;
 }
 
 void Simulation::set_temperature(double temperature)
@@ -115,27 +134,33 @@ void Simulation::time_step(double t)
     this->dose += (this->beam_current * 1e-9 / ELEM_CHARGE) * t;
 
     // Calculate new transition rates
-    this->calc_transition_rates();
+    this->update_transition_rates();
     // Update time
     this->t += t;
     // Update "noisy pn"
     this->pn = this->pn_noisy();
 }
 
-void Simulation::calc_transition_rates()
+void Simulation::update_transition_rates()
+{
+    auto rates = this->calc_transition_rates(this->freq);
+    this->alpha = rates.first;
+    this->beta = rates.second;
+}
+
+std::pair<double, double> Simulation::calc_transition_rates(double freq)
 {
     // Calculate from the Gaussian distributions
     const double SCALE =
         this->fit_params.a / (sqrt(2 * PI) * this->fit_params.s);
-    const double DIFF1 = this->freq - this->fit_params.m1;
-    const double DIFF2 = this->freq - this->fit_params.m2;
+    const double DIFF1 = freq - this->fit_params.m1;
+    const double DIFF2 = freq - this->fit_params.m2;
     const double EXP1 =
         exp(-DIFF1 * DIFF1 / (2 * this->fit_params.s * this->fit_params.s));
     const double EXP2 =
         exp(-DIFF2 * DIFF2 / (2 * this->fit_params.s * this->fit_params.s));
 
-    this->alpha = SCALE * EXP2;
-    this->beta = SCALE * EXP1;
+    return std::make_pair(SCALE * EXP2, SCALE * EXP1);
 }
 
 double Simulation::pn_noisy()
@@ -145,4 +170,15 @@ double Simulation::pn_noisy()
     const double UNIFORM_NOISE = BASE_RANDOMNESS * dist(this->rng);
 
     return this->pn_raw * (1 + THERMAL_NOISE) + UNIFORM_NOISE;
+}
+
+double Simulation::steady_state(double freq)
+{
+    auto rates = this->calc_transition_rates(freq);
+    auto alpha = rates.first;
+    auto beta = rates.second;
+    // See Jeffries-optimal-frequency.nb for details
+    return this->c * this->t1n * (beta - alpha) /
+           (this->t1e * (2 + alpha + beta) +
+            this->c * this->t1n * (alpha + beta + 2 * alpha * beta));
 }
