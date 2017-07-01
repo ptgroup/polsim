@@ -1,10 +1,12 @@
-#include "simulation.hpp"
+#include "polsim/simulation.hpp"
 
 #include <cmath>
 #include <iostream>
 
 #include <boost/math/tools/minima.hpp>
 
+namespace polsim
+{
 void System::set_temperature(double temperature)
 {
     this->temperature = temperature;
@@ -185,4 +187,5 @@ double Simulation::steady_state(double freq) const
     return this->c * this->t1n * (beta - alpha) /
            (this->t1e * (2 + alpha + beta) +
             this->c * this->t1n * (alpha + beta + 2 * alpha * beta));
+}
 }

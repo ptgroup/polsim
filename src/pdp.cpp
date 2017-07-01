@@ -1,5 +1,7 @@
-#include "pdp.hpp"
+#include "polsim/pdp.hpp"
 
+namespace polsim
+{
 Pdp::Pdp(Simulation sim, unsigned n_sweeps) : sim(sim), n_sweeps(n_sweeps)
 {
     this->rng.seed(std::random_device{}());
@@ -32,4 +34,5 @@ Data Pdp::sweep()
     auto dist = std::uniform_real_distribution<double>{-1, 1};
     sweep_data.pn += SWEEP_UNCERTAINTY * dist(rng);
     return sweep_data;
+}
 }

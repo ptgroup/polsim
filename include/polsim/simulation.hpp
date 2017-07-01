@@ -5,13 +5,15 @@
  * @author Ian Johnson
  * @date June 29, 2017
  */
-#ifndef _SIMULATION_HPP
-#define _SIMULATION_HPP
+#ifndef SIMULATION_HPP
+#define SIMULATION_HPP
 
 #include <iostream>
 #include <random>
 #include <utility>
 
+namespace polsim
+{
 /// Elementary charge (in C).
 constexpr double ELEM_CHARGE = 1.602176662e-19;
 /// Pi.
@@ -269,5 +271,6 @@ class Simulation
      */
     double steady_state(double freq) const;
 };
+}
 
 #endif

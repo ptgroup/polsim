@@ -1,5 +1,7 @@
-#include "controller.hpp"
+#include "polsim/controller.hpp"
 
+namespace polsim
+{
 Controller::Controller(Pdp pdp, bool seek_positive)
     : pdp(pdp), seek_positive(seek_positive)
 {
@@ -18,4 +20,5 @@ Data PerfectController::step()
     auto data = this->pdp.take_data();
     this->pdp.set_freq(this->pdp.sim.find_optimal_freq(!this->seek_positive));
     return data;
+}
 }

@@ -5,13 +5,15 @@
  * @author Ian Johnson
  * @date June 29, 2017
  */
-#ifndef _PDP_HPP
-#define _PDP_HPP
+#ifndef PDP_HPP
+#define PDP_HPP
 
 #include "simulation.hpp"
 
 #include <random>
 
+namespace polsim
+{
 /// Time per sweep, in ms.
 constexpr double MS_PER_SWEEP = 64;
 /// Error in polarization per sweep.
@@ -75,5 +77,6 @@ class Pdp
      */
     Data sweep();
 };
+}
 
 #endif

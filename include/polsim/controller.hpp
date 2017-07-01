@@ -5,11 +5,13 @@
  * @author Ian Johnson
  * @date June 30, 2017
  */
-#ifndef _CONTROLLER_HPP
-#define _CONTROLLER_HPP
+#ifndef CONTROLLER_HPP
+#define CONTROLLER_HPP
 
 #include "pdp.hpp"
 
+namespace polsim
+{
 /**
  * @brief The basic (abstract) representation of a motor controller.
  *
@@ -110,5 +112,6 @@ class PerfectController : public Controller
 
     Data step() override;
 };
+}
 
 #endif

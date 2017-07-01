@@ -1,13 +1,13 @@
-#include "controller.hpp"
-#include "pdp.hpp"
-#include "simulation.hpp"
+#include "polsim/controller.hpp"
+#include "polsim/pdp.hpp"
+#include "polsim/simulation.hpp"
 
 #include <iostream>
 
 int main()
 {
-    using std::cout;
-    using std::endl;
+    using namespace std;
+    using namespace polsim;
 
     auto controller = StandardController<4>{Pdp{Simulation{140.0}}};
     controller.system_ref().beam_on();
