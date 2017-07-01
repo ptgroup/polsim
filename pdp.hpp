@@ -25,6 +25,9 @@ constexpr double SWEEP_UNCERTAINTY = 0.04;
  */
 class Pdp
 {
+    // The perfect controller knows everything
+    friend class PerfectController;
+
     /// The underlying system.
     Simulation sim;
     /// The number of sweeps per data reading.
@@ -54,27 +57,17 @@ class Pdp
      */
     Data take_data();
     /**
-     * @brief Returns a reference to the underlying simulation.
+     * @brief Returns a reference to the underlying system.
      *
-     * @return A reference to the underlying simulation.
+     * @return A reference to the underlying system.
      */
-    const Simulation &sim_ref() const;
+    System &system_ref();
     /**
      * @brief Sets the frequency of the underlying simulation.
      *
      * @param freq The new frequency.
      */
     void set_freq(double freq);
-    /**
-     * @brief Turns the beam on with the given current.
-     *
-     * @param current The beam current (in nA).
-     */
-    void beam_on(double current);
-    /**
-     * @brief Turns the beam off.
-     */
-    void beam_off();
 
   private:
     /**

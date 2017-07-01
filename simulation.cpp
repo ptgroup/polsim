@@ -5,6 +5,15 @@
 
 #include <boost/math/tools/minima.hpp>
 
+void System::set_temperature(double temperature)
+{
+    this->temperature = temperature;
+}
+
+void System::beam_on(double current) { this->beam_current = current; }
+
+void System::beam_off() { this->beam_current = 0; }
+
 std::ostream &operator<<(std::ostream &out, const Data &data)
 {
     // Output in the standard CSV format
@@ -15,16 +24,18 @@ Simulation::Simulation(double freq)
 {
     this->set_freq(freq);
     // Make sure pe0 gets initialized
-    this->set_temperature(this->system_temperature);
+    this->set_temperature(this->system.temperature);
     this->update_transition_rates();
     this->rng.seed(std::random_device{}());
 }
 
-Data Simulation::take_data()
+Data Simulation::take_data() const
 {
     return {this->t, this->pn,          this->pe,  this->freq,
             this->c, this->temperature, this->dose};
 }
+
+System &Simulation::system_ref() { return this->system; }
 
 void Simulation::set_freq(double frequency)
 {
@@ -32,15 +43,6 @@ void Simulation::set_freq(double frequency)
     // Make sure transition rates get updated
     this->update_transition_rates();
 }
-
-void Simulation::set_system_temperature(double temperature)
-{
-    this->system_temperature = temperature;
-}
-
-void Simulation::beam_on(double current) { this->beam_current = current; }
-
-void Simulation::beam_off() { this->beam_current = 0; }
 
 void Simulation::run_for(double t, double step)
 {
@@ -56,10 +58,10 @@ void Simulation::anneal(double t, double temperature)
     // Maybe change T1n?
     this->t1n *= 0.8;
 
-    auto temp_tmp = this->system_temperature;
-    this->set_system_temperature(temperature);
+    auto temp_tmp = this->system.temperature;
+    this->system.set_temperature(temperature);
     this->run_for(t);
-    this->set_system_temperature(temp_tmp);
+    this->system.set_temperature(temp_tmp);
 }
 
 double Simulation::find_optimal_freq(bool negative) const
@@ -94,11 +96,12 @@ void Simulation::time_step(double t)
     // If we're annealing, we shouldn't allow the temperature to change (assume
     // anneals occur at constant temperature)
     const double k_temp = 0.01;
-    const double temp_ss = this->system_temperature + this->beam_current / 100;
+    const double temp_ss =
+        this->system.temperature + this->system.beam_current / 100;
 
     // Increase phi according to some exponential growth when the beam is on
     // Parameters are similar to those for temperature change
-    const double k_phi = this->beam_current / 1e7;
+    const double k_phi = this->system.beam_current / 1e7;
     const double phi_ss = 0.001;
 
     // Calculate convenience constants
@@ -121,17 +124,18 @@ void Simulation::time_step(double t)
                           t * k_temp * (temp_ss - this->temperature));
     this->phi += t * k_phi * (phi_ss - this->phi);
     // Update C
-    this->c += IRRADIATION_FACTOR * this->beam_current * t;
+    this->c += IRRADIATION_FACTOR * this->system.beam_current * t;
 
     // Update dose, along with the fit parameters M1 and M2, which depend on it.
     // Recall the exponential change of M1 and M2 described in the
     // documentation.
-    const double delta_dose = (this->beam_current * 1e-9 / ELEM_CHARGE) * t;
+    const double delta_dose =
+        (this->system.beam_current * 1e-9 / ELEM_CHARGE) * t;
     this->fit_params.m1 +=
         FIT_M1_COEFF * FIT_M1_RATE * delta_dose * exp(FIT_M1_RATE * this->dose);
     this->fit_params.m2 +=
         FIT_M2_COEFF * FIT_M2_RATE * delta_dose * exp(FIT_M2_RATE * this->dose);
-    this->dose += (this->beam_current * 1e-9 / ELEM_CHARGE) * t;
+    this->dose += (this->system.beam_current * 1e-9 / ELEM_CHARGE) * t;
 
     // Calculate new transition rates
     this->update_transition_rates();

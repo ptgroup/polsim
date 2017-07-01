@@ -32,6 +32,7 @@ class Controller
      * @param seek_positive Whether to seek positive polarization.
      */
     Controller(Pdp pdp, bool seek_positive = true);
+
     /**
      * @brief Performs a single step of the algorithm.
      *
@@ -43,6 +44,12 @@ class Controller
      * @return The last data point collected by the underlying PDP.
      */
     virtual Data step() = 0;
+    /**
+     * @brief Returns a reference to the underlying system.
+     *
+     * @return A reference to the underlying system.
+     */
+    System &system_ref();
 };
 
 /**

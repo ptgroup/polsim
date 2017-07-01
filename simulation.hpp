@@ -93,12 +93,59 @@ struct Data {
 };
 
 /**
+ * @brief The system in which the simulation works.
+ *
+ * The "system" includes everything external to the polarized target itself;
+ * this includes the beam and the temperature of the fridge, for example.
+ */
+class System
+{
+    friend class Simulation;
+
+    /// System temperature (K).
+    double temperature = 1;
+    /// Beam current (nA).
+    double beam_current = 0;
+
+  public:
+    System() = default;
+
+    /**
+     * @brief Sets the system temperature.
+     *
+     * The system temperature is distinct from the internal temperature used in
+     * the simulation. The system temperature may be thought of as the
+     * temperature of the fridge, while the internal temperature is the
+     * temperature of the target itself.
+     *
+     * @param temperature The new system temperature.
+     */
+    void set_temperature(double temperature);
+    /**
+     * @brief Turns the beam on.
+     *
+     * @param current The beam current, in nA.
+     */
+    void beam_on(double current = 100.0);
+    /**
+     * @brief Turns the beam off.
+     */
+    void beam_off();
+};
+
+/**
  * @brief The simulation for spin 1/2.
  */
 class Simulation
 {
+    // The perfect controller knows everything
+    friend class PerfectController;
+
     /// The fit parameters currently in use.
     FitParameters fit_params;
+
+    /// The underlying system.
+    System system;
 
     double t1n = 25 * 60;
     double t1e = 0.03;
@@ -109,8 +156,6 @@ class Simulation
     double freq;
     /// Temperature (K).
     double temperature;
-    /// System temperature (K).
-    double system_temperature = 1;
 
     double alpha, beta;
     double c = 0.000136073;
@@ -124,8 +169,6 @@ class Simulation
 
     /// Dose (electrons per cm^3).
     double dose = 0;
-    /// Beam current (nA).
-    double beam_current = 0;
 
     /// The internal random number generator.
     std::mt19937 rng;
@@ -141,34 +184,19 @@ class Simulation
     /**
      * @brief Returns observable data readings.
      */
-    Data take_data();
+    Data take_data() const;
+    /**
+     * @brief Returns a reference to the underlying system.
+     *
+     * @return A reference to the underlying system.
+     */
+    System &system_ref();
     /**
      * @brief Sets the frequency.
      *
      * @param freq The new frequency.
      */
     void set_freq(double freq);
-    /**
-     * @brief Sets the system temperature.
-     *
-     * The system temperature is distinct from the internal temperature used in
-     * the simulation. The system temperature may be thought of as the
-     * temperature of the fridge, while the internal temperature is the
-     * temperature of the target itself.
-     *
-     * @param temperature The new system temperature.
-     */
-    void set_system_temperature(double temperature);
-    /**
-     * @brief Turns the beam on.
-     *
-     * @param current The beam current, in nA.
-     */
-    void beam_on(double current);
-    /**
-     * @brief Turns the beam off.
-     */
-    void beam_off();
     /**
      * @brief Runs the simulation for the specified time.
      *
