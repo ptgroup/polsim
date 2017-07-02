@@ -1,4 +1,6 @@
 BasedOnStyle: LLVM
 AlwaysBreakTemplateDeclarations: true
 BreakBeforeBraces: Linux
-IndentWidth: 4
+IndentWidth: 8
+TabWidth: 8
+UseTab: ForIndentation

@@ -20,38 +20,40 @@ namespace polsim
  */
 class Controller
 {
-  protected:
-    /// The underlying PDP simulation, from which all data is taken.
-    Pdp pdp;
-    /// Whether to seek positive polarization.
-    bool seek_positive;
+      protected:
+	/// The underlying PDP simulation, from which all data is taken.
+	Pdp pdp;
+	/// Whether to seek positive polarization.
+	bool seek_positive;
 
-  public:
-    /**
-     * @brief Constructs a controller.
-     *
-     * @param pdp The underlying PDP simulation.
-     * @param seek_positive Whether to seek positive polarization.
-     */
-    Controller(Pdp pdp, bool seek_positive = true);
+      public:
+	/**
+	 * @brief Constructs a controller.
+	 *
+	 * @param pdp The underlying PDP simulation.
+	 * @param seek_positive Whether to seek positive polarization.
+	 */
+	Controller(Pdp pdp, bool seek_positive = true);
 
-    /**
-     * @brief Performs a single step of the algorithm.
-     *
-     * Usually, what this will look like is that the controller will take
-     * several data points in order to make a decision concerning how to move to
-     * motor, and will then move the motor, concluding the step. This behavior
-     * may differ, though, depending on the controller.
-     *
-     * @return The last data point collected by the underlying PDP.
-     */
-    virtual Data step() = 0;
-    /**
-     * @brief Returns a reference to the underlying system.
-     *
-     * @return A reference to the underlying system.
-     */
-    System &system_ref();
+	/**
+	 * @brief Performs a single step of the algorithm.
+	 *
+	 * Usually, what this will look like is that the controller will take
+	 * several data points in order to make a decision concerning how to
+	 * move to
+	 * motor, and will then move the motor, concluding the step. This
+	 * behavior
+	 * may differ, though, depending on the controller.
+	 *
+	 * @return The last data point collected by the underlying PDP.
+	 */
+	virtual Data step() = 0;
+	/**
+	 * @brief Returns a reference to the underlying system.
+	 *
+	 * @return A reference to the underlying system.
+	 */
+	System &system_ref();
 };
 
 /**
@@ -70,28 +72,28 @@ class Controller
 template <unsigned n_points>
 class StandardController : public Controller
 {
-    static_assert(n_points >= 2, "Must use at least 2 points per step");
+	static_assert(n_points >= 2, "Must use at least 2 points per step");
 
-    /// The fraction by which to decrease step size on direction change.
-    constexpr static double STEP_SIZE_REDUCE = 0.8;
+	/// The fraction by which to decrease step size on direction change.
+	constexpr static double STEP_SIZE_REDUCE = 0.8;
 
-    /// The last rate collected by this controller.
-    double last_rate = 0;
-    /// The frequency step size (GHz).
-    double step_size;
+	/// The last rate collected by this controller.
+	double last_rate = 0;
+	/// The frequency step size (GHz).
+	double step_size;
 
-  public:
-    /**
-     * @brief Constructs a new controller.
-     *
-     * @param pdp The underlying PDP simulation.
-     * @param step_size The initial step size to use (in GHz).
-     * @param seek_positive Whether to seek positive polarization.
-     */
-    StandardController(Pdp pdp, double step_size = 0.05,
-                       bool seek_positive = true);
+      public:
+	/**
+	 * @brief Constructs a new controller.
+	 *
+	 * @param pdp The underlying PDP simulation.
+	 * @param step_size The initial step size to use (in GHz).
+	 * @param seek_positive Whether to seek positive polarization.
+	 */
+	StandardController(Pdp pdp, double step_size = 0.05,
+	                   bool seek_positive = true);
 
-    Data step() override;
+	Data step() override;
 };
 
 #include "StandardController.tpp"
@@ -107,10 +109,10 @@ class StandardController : public Controller
  */
 class PerfectController : public Controller
 {
-  public:
-    PerfectController(Pdp pdp, bool seek_positive = true);
+      public:
+	PerfectController(Pdp pdp, bool seek_positive = true);
 
-    Data step() override;
+	Data step() override;
 };
 
 /**
@@ -118,10 +120,10 @@ class PerfectController : public Controller
  */
 class ExperimentalController : public Controller
 {
-  public:
-    ExperimentalController(Pdp pdp, bool seek_positive = true);
+      public:
+	ExperimentalController(Pdp pdp, bool seek_positive = true);
 
-    Data step() override;
+	Data step() override;
 };
 }
 
