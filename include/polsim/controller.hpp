@@ -112,6 +112,17 @@ class PerfectController : public Controller
 
     Data step() override;
 };
+
+/**
+ * @brief An experimental motor controller.
+ */
+class ExperimentalController : public Controller
+{
+  public:
+    ExperimentalController(Pdp pdp, bool seek_positive = true);
+
+    Data step() override;
+};
 }
 
 #endif

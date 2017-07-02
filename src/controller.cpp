@@ -21,4 +21,14 @@ Data PerfectController::step()
     this->pdp.set_freq(this->pdp.sim.find_optimal_freq(!this->seek_positive));
     return data;
 }
+
+ExperimentalController::ExperimentalController(Pdp pdp, bool seek_positive)
+    : Controller(pdp, seek_positive)
+{
+}
+
+Data ExperimentalController::step()
+{
+    //
+}
 }
