@@ -20,13 +20,13 @@ namespace polsim
  */
 class Controller
 {
-      protected:
+protected:
 	/// The underlying PDP simulation, from which all data is taken.
 	Pdp pdp;
 	/// Whether to seek positive polarization.
 	bool seek_positive;
 
-      public:
+public:
 	/**
 	 * @brief Constructs a controller.
 	 *
@@ -82,7 +82,7 @@ class StandardController : public Controller
 	/// The frequency step size (GHz).
 	double step_size;
 
-      public:
+public:
 	/**
 	 * @brief Constructs a new controller.
 	 *
@@ -109,7 +109,7 @@ class StandardController : public Controller
  */
 class PerfectController : public Controller
 {
-      public:
+public:
 	PerfectController(Pdp pdp, bool seek_positive = true);
 
 	Data step() override;
@@ -120,7 +120,7 @@ class PerfectController : public Controller
  */
 class ExperimentalController : public Controller
 {
-      public:
+public:
 	ExperimentalController(Pdp pdp, bool seek_positive = true);
 
 	Data step() override;

@@ -109,7 +109,7 @@ class System
 	/// Beam current (nA).
 	double beam_current = 0;
 
-      public:
+public:
 	System() = default;
 
 	/**
@@ -176,7 +176,7 @@ class Simulation
 	/// The internal random number generator.
 	std::mt19937 rng;
 
-      public:
+public:
 	/**
 	 * @brief Constructs a Simulation.
 	 *
@@ -231,7 +231,7 @@ class Simulation
 	 */
 	double find_optimal_freq(bool negative = false) const;
 
-      private:
+private:
 	/**
 	 * @brief Sets the internal simulation temperature.
 	 *

@@ -37,7 +37,7 @@ class Pdp
 	/// The internal random number generator.
 	std::mt19937 rng;
 
-      public:
+public:
 	/**
 	 * @brief Constructs a new PDP simulator.
 	 *
@@ -72,7 +72,7 @@ class Pdp
 	 */
 	void set_freq(double freq);
 
-      private:
+private:
 	/**
 	 * @brief Performs a single sweep and returns its data.
 	 */

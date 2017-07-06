@@ -1,4 +1,5 @@
 BasedOnStyle: LLVM
+AccessModifierOffset: -8
 AlwaysBreakTemplateDeclarations: true
 BreakBeforeBraces: Linux
 IndentWidth: 8
