@@ -11,7 +11,7 @@ CXXFLAGS := $(CXXFLAGS) -std=c++11 -Wall -Wextra -Werror -I$(INCLUDEDIR)
 OBJS = controller.o main.o pdp.o simulation.o
 OBJ_PATHS = $(OBJS:%=$(BUILDDIR)/%)
 
-.PHONY: all clean docs
+.PHONY: all clean docs run
 
 all: $(BUILDDIR)/$(OUTNAME)
 
@@ -20,6 +20,9 @@ clean:
 
 docs:
 	doxygen
+
+run: $(BUILDDIR)/$(OUTNAME)
+	$(BUILDDIR)/$(OUTNAME)
 
 $(BUILDDIR):
 	mkdir -p $(BUILDDIR)

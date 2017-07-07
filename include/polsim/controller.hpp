@@ -99,6 +99,48 @@ public:
 #include "StandardController.tpp"
 
 /**
+ * @brief The "standard" motor controller.
+ *
+ * This motor controller uses a simple "rate comparison" algorithm; that is, it
+ * simply collects a bunch of data points, averages the rate of polarization
+ * change over time, and compares that rate to the one previously collected. If
+ * the rate goes down (for positive seek), then it switches direction, with a
+ * small decrease in step size. If the rate goes up, it keeps going in the same
+ * direction.
+ *
+ * @tparam n_points The number of data points to take per step (must be at least
+ * 2).
+ */
+template <unsigned n_points>
+class StandardController2 : public Controller
+{
+	static_assert(n_points >= 2, "Must use at least 2 points per step");
+
+	/// The fraction by which to decrease step size on direction change.
+	constexpr static double STEP_SIZE_REDUCE = 0.8;
+
+	/// The last rate collected by this controller.
+	double last_rate = 0;
+	/// The frequency step size (GHz).
+	double step_size;
+
+public:
+	/**
+	 * @brief Constructs a new controller.
+	 *
+	 * @param pdp The underlying PDP simulation.
+	 * @param step_size The initial step size to use (in GHz).
+	 * @param seek_positive Whether to seek positive polarization.
+	 */
+	StandardController2(Pdp pdp, double step_size = 0.05,
+	                    bool seek_positive = true);
+
+	Data step() override;
+};
+
+#include "StandardController2.tpp"
+
+/**
  * @brief A perfect motor controller.
  *
  * This motor controller uses knowledge of the optimal frequency at every point
@@ -111,17 +153,6 @@ class PerfectController : public Controller
 {
 public:
 	PerfectController(Pdp pdp, bool seek_positive = true);
-
-	Data step() override;
-};
-
-/**
- * @brief An experimental motor controller.
- */
-class ExperimentalController : public Controller
-{
-public:
-	ExperimentalController(Pdp pdp, bool seek_positive = true);
 
 	Data step() override;
 };

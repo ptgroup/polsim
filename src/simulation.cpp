@@ -110,7 +110,7 @@ void Simulation::time_step(double t)
 	const double phi_ss = 0.001;
 
 	// Calculate convenience constants
-	const double A = this->t1e / this->t1n -
+	const double A = -this->t1e / this->t1n -
 	                 (this->c / 2) * (this->alpha + this->beta) - this->phi;
 	const double B = (this->c / 2) * (this->alpha - this->beta);
 	const double C = (this->alpha - this->beta) / 2;
