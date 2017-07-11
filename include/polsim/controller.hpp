@@ -10,6 +10,8 @@
 
 #include "pdp.hpp"
 
+#include <list>
+
 namespace polsim
 {
 /**
@@ -74,13 +76,17 @@ class StandardController : public Controller
 {
 	static_assert(n_points >= 2, "Must use at least 2 points per step");
 
+	/// The minimum step size.
+	constexpr static double MIN_STEP_SIZE = 0.001;
 	/// The fraction by which to decrease step size on direction change.
 	constexpr static double STEP_SIZE_REDUCE = 0.8;
 
 	/// The last rate collected by this controller.
 	double last_rate = 0;
-	/// The frequency step size (GHz).
+	/// The frequency step size (GHz), as an absolute value.
 	double step_size;
+	/// The direction (the sign of the step size).
+	double direction = 1.0;
 
 public:
 	/**
@@ -116,13 +122,23 @@ class StandardController2 : public Controller
 {
 	static_assert(n_points >= 2, "Must use at least 2 points per step");
 
+	/// The minimum step size.
+	constexpr static double MIN_STEP_SIZE = 0.001;
 	/// The fraction by which to decrease step size on direction change.
 	constexpr static double STEP_SIZE_REDUCE = 0.8;
+	/// The fraction by which to increase step size for corrections.
+	constexpr static double STEP_SIZE_CORRECT = 3.0;
+	/// The number of previous rates to store.
+	constexpr static int N_RATES = 5;
+	/// The fraction of the minimum last rate to consider "bad".
+	constexpr static double BAD_FRACTION = 0.7;
 
-	/// The last rate collected by this controller.
-	double last_rate = 0;
+	/// The N_RATES last rates collected by the controller.
+	std::list<double> last_rates;
 	/// The frequency step size (GHz).
 	double step_size;
+	/// The direction (the sign of the step size).
+	double direction = 1.0;
 
 public:
 	/**
@@ -136,6 +152,21 @@ public:
 	                    bool seek_positive = true);
 
 	Data step() override;
+
+private:
+	/**
+	 * @brief Adds the given rate to the list of previous rates.
+	 *
+	 * @param rate The rate to add.
+	 */
+	void add_rate(double rate);
+	/**
+	 * @brief Calculates the minimum of the previous rates which have been
+	 * collected.
+	 *
+	 * @return The minimum rate.
+	 */
+	double minimum_rate();
 };
 
 #include "StandardController2.tpp"

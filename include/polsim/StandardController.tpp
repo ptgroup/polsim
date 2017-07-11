@@ -30,10 +30,14 @@ Data StandardController<n_points>::step()
 	avg_rate /= n_points;
 
 	// Compare the rate to the last one and move accordingly
-	if (avg_rate < last_rate)
-		this->step_size *=
-		    -StandardController<n_points>::STEP_SIZE_REDUCE;
-	this->pdp.set_freq(last_data.freq + this->step_size);
+	if (avg_rate < last_rate) {
+		this->step_size *= STEP_SIZE_REDUCE;
+		this->direction *= -1.0;
+		// We shouldn't go below a certain step size.
+		if (this->step_size < MIN_STEP_SIZE)
+			this->step_size = MIN_STEP_SIZE;
+	}
+	this->pdp.set_freq(last_data.freq + this->direction * this->step_size);
 	last_rate = avg_rate;
 
 	return last_data;

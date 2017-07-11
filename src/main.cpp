@@ -11,21 +11,24 @@ int main()
 
 	auto controller = StandardController<3>{Pdp{Simulation{140.0}}};
 	auto perfect = PerfectController{Pdp{Simulation{140.0}}};
-	// auto experimental = StandardController2<3>{Pdp{Simulation{140.0}}};
+	auto experimental = StandardController2<3>{Pdp{Simulation{140.0}}};
 	controller.system_ref().beam_on();
 	perfect.system_ref().beam_on();
+	experimental.system_ref().beam_on();
+
+	constexpr auto steps = 50;
 
 	cout << "Perfect:" << endl;
-	for (auto i = 0; i < 120; i++)
+	for (auto i = 0; i < 3 * steps; i++)
 		cout << perfect.step() << endl;
 
 	cout << "Standard:" << endl;
-	for (auto i = 0; i < 40; i++)
+	for (auto i = 0; i < steps; i++)
 		cout << controller.step() << endl;
 
-	// cout << "Experimental:" << endl;
-	// for (auto i = 0; i < 20; i++)
-	// cout << experimental.step() << endl;
+	cout << "Experimental:" << endl;
+	for (auto i = 0; i < steps; i++)
+		cout << experimental.step() << endl;
 
 	return 0;
 }
