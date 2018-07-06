@@ -6,7 +6,7 @@ INCLUDEDIR = include
 SRCDIR = src
 BUILDDIR = build
 
-CXXFLAGS := $(CXXFLAGS) -std=c++11 -Wall -Wextra -pedantic -I$(INCLUDEDIR)
+CXXFLAGS := $(CXXFLAGS) -std=c++14 -Wall -Wextra -pedantic -I$(INCLUDEDIR)
 
 OBJS = controller.o main.o pdp.o simulation.o
 OBJ_PATHS = $(OBJS:%=$(BUILDDIR)/%)

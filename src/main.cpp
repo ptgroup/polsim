@@ -6,15 +6,14 @@
 
 int main()
 {
-	using namespace std;
 	using namespace polsim;
+	using std::cout;
+	using std::endl;
 
-	auto controller = StandardController<3>{Pdp{Simulation{140.0}}};
-	auto perfect = PerfectController{Pdp{Simulation{140.0}}};
-	auto experimental = StandardController2<3>{Pdp{Simulation{140.0}}};
-	controller.system_ref().beam_on();
-	perfect.system_ref().beam_on();
-	experimental.system_ref().beam_on();
+	constexpr auto start = 140.15;
+	auto controller = StandardController<3>{Pdp{Simulation{start}}};
+	auto perfect = PerfectController{Pdp{Simulation{start}}};
+	auto experimental = ExperimentalController<3>{Pdp{Simulation{start}}};
 
 	constexpr auto steps = 50;
 
