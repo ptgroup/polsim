@@ -69,13 +69,13 @@ constexpr double IRRADIATION_FACTOR = 1e-10;
  */
 struct FitParameters {
 	/// The height of the distributions.
-	double a = 0.545266;
+	double a = 18.7208599999999983;
 	/// The standard deviation.
-	double s = 0.088415;
+	double s = 0.0835606000000000;
 	/// The mean of the beta distribution.
-	double m1 = 140.241;
+	double m1 = 140.1899999999999980;
 	/// The mean of the alpha distribution.
-	double m2 = 140.533;
+	double m2 = 140.4550000000000120;
 };
 
 /**
@@ -161,7 +161,7 @@ class Simulation
 	double temperature;
 
 	double alpha, beta;
-	double c = 0.000136073;
+	double c = 0.000336073;
 	double pe0;
 	double phi = 0;
 

@@ -10,7 +10,7 @@ int main()
 	using std::cout;
 	using std::endl;
 
-	constexpr auto start = 140.15;
+	constexpr auto start = 140.0;
 	auto controller = StandardController<3>{Pdp{Simulation{start}}};
 	auto perfect = PerfectController{Pdp{Simulation{start}}};
 	auto experimental = ExperimentalController<3>{Pdp{Simulation{start}}};

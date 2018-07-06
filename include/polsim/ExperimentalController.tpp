@@ -48,7 +48,7 @@ Data ExperimentalController<n_points>::step()
 	const auto k = pn_prime(t1);
 
 	// Compare the rate to the last one and move accordingly
-	if (k / last_k < 0.9) {
+	if (last_k != 0 && fabs(k / last_k) < 0.8) {
 		this->step_size *= STEP_SIZE_REDUCE;
 		this->direction *= -1.0;
 		// We shouldn't go below a certain step size.
