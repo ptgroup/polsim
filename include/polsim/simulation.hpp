@@ -33,6 +33,8 @@ constexpr double FIT_M1_COEFF = 0.045;
 constexpr double FIT_M2_RATE = -3.8e-15;
 /// The same as ::FIT_M1_COEFF, but for M2.
 constexpr double FIT_M2_COEFF = -0.065;
+/// The (linear) rate at which the fit parameter A changes with respect to dose.
+constexpr double FIT_A_COEFF = -0.5e-14;
 
 /**
  * @brief Thermal randomness fraction.

@@ -17,7 +17,7 @@ namespace polsim
 /// Time per sweep, in ms.
 constexpr double MS_PER_SWEEP = 64;
 /// Error in polarization per sweep.
-constexpr double SWEEP_UNCERTAINTY = 0.04;
+constexpr double SWEEP_UNCERTAINTY = 0.01;
 
 /**
  * @brief The PDP simulation.

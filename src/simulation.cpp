@@ -100,14 +100,12 @@ void Simulation::time_step(double t)
 	// If we're annealing, we shouldn't allow the temperature to change
 	// (assume
 	// anneals occur at constant temperature)
-	const double k_temp = 0.01;
+	const double k_temp = 1;
 	const double temp_ss =
-	    this->system.temperature + this->system.beam_current / 100;
+	    this->system.temperature + 0.25 * this->system.beam_current / 100;
 
-	// Increase phi according to some exponential growth when the beam is on
-	// Parameters are similar to those for temperature change
-	const double k_phi = this->system.beam_current / 1e7;
-	const double phi_ss = 0.001;
+	// Increase phi linearly.
+	const double k_phi = (this->system.beam_current - 30) / 1e8;
 
 	// Calculate convenience constants
 	const double A = -this->t1e / this->t1n -
@@ -127,7 +125,9 @@ void Simulation::time_step(double t)
 	// Update temperature and phi
 	this->set_temperature(this->temperature +
 	                      t * k_temp * (temp_ss - this->temperature));
-	this->phi += t * k_phi * (phi_ss - this->phi);
+	this->phi += t * k_phi;
+	if (this->phi < 0)
+		this->phi = 0;
 	// Update C
 	this->c += IRRADIATION_FACTOR * this->system.beam_current * t;
 
@@ -141,6 +141,7 @@ void Simulation::time_step(double t)
 	                       exp(FIT_M1_RATE * this->dose);
 	this->fit_params.m2 += FIT_M2_COEFF * FIT_M2_RATE * delta_dose *
 	                       exp(FIT_M2_RATE * this->dose);
+	this->fit_params.a += FIT_A_COEFF * delta_dose * this->fit_params.a;
 	this->dose += (this->system.beam_current * 1e-9 / ELEM_CHARGE) * t;
 
 	// Calculate new transition rates
