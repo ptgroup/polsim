@@ -16,10 +16,9 @@ PerfectController::PerfectController(Pdp pdp, bool seek_positive)
 
 Data PerfectController::step()
 {
-	// Take data and then move to the new optimal frequency
-	auto data = this->pdp.take_data();
-	this->pdp.set_freq(
-	    this->pdp.sim.find_optimal_freq(!this->seek_positive));
-	return data;
+    // Take data and then move to the new optimal frequency
+    auto data = this->pdp.take_data();
+    this->pdp.set_freq(this->pdp.sim.find_optimal_freq(!this->seek_positive));
+    return data;
 }
-}
+} // namespace polsim

@@ -75,14 +75,14 @@ constexpr double IRRADIATION_FACTOR = 1e-10;
  * the April 2016 cooldown.
  */
 struct FitParameters {
-	/// The height of the distributions.
-	double a = 18.7208599999999983;
-	/// The standard deviation.
-	double s = 0.0835606000000000;
-	/// The mean of the beta distribution.
-	double m1 = 140.1899999999999980;
-	/// The mean of the alpha distribution.
-	double m2 = 140.4550000000000120;
+    /// The height of the distributions.
+    double a = 18.7208599999999983;
+    /// The standard deviation.
+    double s = 0.0835606000000000;
+    /// The mean of the beta distribution.
+    double m1 = 140.1899999999999980;
+    /// The mean of the alpha distribution.
+    double m2 = 140.4550000000000120;
 };
 
 /**
@@ -91,14 +91,14 @@ struct FitParameters {
  * Each data point contains all observable data at a particular time.
  */
 struct Data {
-	double t, pn, pe, freq, c, temperature, dose;
+    double t, pn, pe, freq, c, temperature, dose;
 
-	/**
-	 * @brief Outputs the data in standard CSV format.
-	 *
-	 * This will be `time, pn, freq`.
-	 */
-	friend std::ostream &operator<<(std::ostream &out, const Data &data);
+    /**
+     * @brief Outputs the data in standard CSV format.
+     *
+     * This will be `time, pn, freq`.
+     */
+    friend std::ostream &operator<<(std::ostream &out, const Data &data);
 };
 
 /**
@@ -109,38 +109,38 @@ struct Data {
  */
 class System
 {
-	friend class Simulation;
+    friend class Simulation;
 
-	/// System temperature (K).
-	double temperature = 1;
-	/// Beam current (nA).
-	double beam_current = 0;
+    /// System temperature (K).
+    double temperature = 1;
+    /// Beam current (nA).
+    double beam_current = 0;
 
 public:
-	System() = default;
+    System() = default;
 
-	/**
-	 * @brief Sets the system temperature.
-	 *
-	 * The system temperature is distinct from the internal temperature used
-	 * in
-	 * the simulation. The system temperature may be thought of as the
-	 * temperature of the fridge, while the internal temperature is the
-	 * temperature of the target itself.
-	 *
-	 * @param temperature The new system temperature.
-	 */
-	void set_temperature(double temperature);
-	/**
-	 * @brief Turns the beam on.
-	 *
-	 * @param current The beam current, in nA.
-	 */
-	void beam_on(double current = 100.0);
-	/**
-	 * @brief Turns the beam off.
-	 */
-	void beam_off();
+    /**
+     * @brief Sets the system temperature.
+     *
+     * The system temperature is distinct from the internal temperature used
+     * in
+     * the simulation. The system temperature may be thought of as the
+     * temperature of the fridge, while the internal temperature is the
+     * temperature of the target itself.
+     *
+     * @param temperature The new system temperature.
+     */
+    void set_temperature(double temperature);
+    /**
+     * @brief Turns the beam on.
+     *
+     * @param current The beam current, in nA.
+     */
+    void beam_on(double current = 100.0);
+    /**
+     * @brief Turns the beam off.
+     */
+    void beam_off();
 };
 
 /**
@@ -148,139 +148,139 @@ public:
  */
 class Simulation
 {
-	// The perfect controller knows everything
-	friend class PerfectController;
+    // The perfect controller knows everything
+    friend class PerfectController;
 
-	/// The fit parameters currently in use.
-	FitParameters fit_params;
+    /// The fit parameters currently in use.
+    FitParameters fit_params;
 
-	/// The underlying system.
-	System system;
+    /// The underlying system.
+    System system;
 
-	double t1n = 25 * 60;
-	double t1e = 0.03;
+    double t1n = 25 * 60;
+    double t1e = 0.03;
 
-	/// Current time (in seconds).
-	double t = 0;
-	/// Frequency (GHz).
-	double freq;
-	/// Temperature (K).
-	double temperature;
+    /// Current time (in seconds).
+    double t = 0;
+    /// Frequency (GHz).
+    double freq;
+    /// Temperature (K).
+    double temperature;
 
-	double alpha, beta;
-	double c = 0.000336073;
-	double pe0;
-	double phi = 0;
+    double alpha, beta;
+    double c = 0.000336073;
+    double pe0;
+    double phi = 0;
 
-	/// The "raw polarization" (no random fluctuations).
-	double pn_raw = 0;
-	double pn = 0;
-	double pe = -1;
+    /// The "raw polarization" (no random fluctuations).
+    double pn_raw = 0;
+    double pn = 0;
+    double pe = -1;
 
-	/// Dose (electrons per cm^3).
-	double dose = 0;
+    /// Dose (electrons per cm^3).
+    double dose = 0;
 
-	/// The internal random number generator.
-	std::mt19937 rng;
+    /// The internal random number generator.
+    std::mt19937 rng;
 
 public:
-	/**
-	 * @brief Constructs a Simulation.
-	 *
-	 * @param freq The initial frequency.
-	 */
-	Simulation(double freq);
+    /**
+     * @brief Constructs a Simulation.
+     *
+     * @param freq The initial frequency.
+     */
+    Simulation(double freq);
 
-	/**
-	 * @brief Returns observable data readings.
-	 */
-	Data take_data() const;
-	/**
-	 * @brief Returns a reference to the underlying system.
-	 *
-	 * @return A reference to the underlying system.
-	 */
-	System &system_ref();
-	/**
-	 * @brief Sets the frequency.
-	 *
-	 * @param freq The new frequency.
-	 */
-	void set_freq(double freq);
-	/**
-	 * @brief Runs the simulation for the specified time.
-	 *
-	 * Note that if the given time is not a multiple of the time step, the
-	 * simulation will actually run for longer than the specified time.
-	 * Large
-	 * time steps will lead to more inaccuracy in the simulated values.
-	 *
-	 * @param t The time (in seconds) to run the simulation.
-	 * @param step The time step to use (as in Euler's method).
-	 */
-	void run_for(double t, double step = 0.001);
-	/**
-	 * @brief Performs an anneal.
-	 *
-	 * The mechanics of the anneal are not finalized, and may be completely
-	 * bogus.
-	 *
-	 * @param t The time to anneal (in seconds).
-	 * @param temperature The temperature at which to anneal (in K).
-	 */
-	void anneal(double t, double temperature);
-	/**
-	 * @brief Attempts to find the optimal polarization frequency.
-	 *
-	 * @param negative Whether to find the optimal frequency for negative
-	 * polarization.
-	 * @return The optimal frequency.
-	 */
-	double find_optimal_freq(bool negative = false) const;
+    /**
+     * @brief Returns observable data readings.
+     */
+    Data take_data() const;
+    /**
+     * @brief Returns a reference to the underlying system.
+     *
+     * @return A reference to the underlying system.
+     */
+    System &system_ref();
+    /**
+     * @brief Sets the frequency.
+     *
+     * @param freq The new frequency.
+     */
+    void set_freq(double freq);
+    /**
+     * @brief Runs the simulation for the specified time.
+     *
+     * Note that if the given time is not a multiple of the time step, the
+     * simulation will actually run for longer than the specified time.
+     * Large
+     * time steps will lead to more inaccuracy in the simulated values.
+     *
+     * @param t The time (in seconds) to run the simulation.
+     * @param step The time step to use (as in Euler's method).
+     */
+    void run_for(double t, double step = 0.001);
+    /**
+     * @brief Performs an anneal.
+     *
+     * The mechanics of the anneal are not finalized, and may be completely
+     * bogus.
+     *
+     * @param t The time to anneal (in seconds).
+     * @param temperature The temperature at which to anneal (in K).
+     */
+    void anneal(double t, double temperature);
+    /**
+     * @brief Attempts to find the optimal polarization frequency.
+     *
+     * @param negative Whether to find the optimal frequency for negative
+     * polarization.
+     * @return The optimal frequency.
+     */
+    double find_optimal_freq(bool negative = false) const;
 
 private:
-	/**
-	 * @brief Sets the internal simulation temperature.
-	 *
-	 * This ensures that any dependent parameters are set correctly.
-	 */
-	void set_temperature(double temperature);
-	/**
-	 * @brief Makes a single time step.
-	 *
-	 * This performs a single iteration of Euler's method using the solid
-	 * effect
-	 * equations, where the step size is the specified time.
-	 *
-	 * @param t The time step to use.
-	 */
-	void time_step(double t);
-	/**
-	 * @brief Updates the parameters alpha and beta.
-	 */
-	void update_transition_rates();
-	/**
-	 * @brief Calculates the parameters alpha and beta at the given
-	 * frequency.
-	 *
-	 * @param freq The frequency at which to calculate the parameters.
-	 * @return The transition rates alpha and beta as a std::pair.
-	 */
-	std::pair<double, double> calc_transition_rates(double freq) const;
-	/**
-	 * @brief Returns the polarization after taking into account thermal
-	 * fluctuations.
-	 */
-	double pn_noisy();
-	/**
-	 * @brief Calculates the steady state at the given frequency.
-	 *
-	 * This will use the current internal fit parameters.
-	 *
-	 * @param freq The frequency at which to calculate the steady state.
-	 * @return The steady state polarization.
-	 */
-	double steady_state(double freq) const;
+    /**
+     * @brief Sets the internal simulation temperature.
+     *
+     * This ensures that any dependent parameters are set correctly.
+     */
+    void set_temperature(double temperature);
+    /**
+     * @brief Makes a single time step.
+     *
+     * This performs a single iteration of Euler's method using the solid
+     * effect
+     * equations, where the step size is the specified time.
+     *
+     * @param t The time step to use.
+     */
+    void time_step(double t);
+    /**
+     * @brief Updates the parameters alpha and beta.
+     */
+    void update_transition_rates();
+    /**
+     * @brief Calculates the parameters alpha and beta at the given
+     * frequency.
+     *
+     * @param freq The frequency at which to calculate the parameters.
+     * @return The transition rates alpha and beta as a std::pair.
+     */
+    std::pair<double, double> calc_transition_rates(double freq) const;
+    /**
+     * @brief Returns the polarization after taking into account thermal
+     * fluctuations.
+     */
+    double pn_noisy();
+    /**
+     * @brief Calculates the steady state at the given frequency.
+     *
+     * This will use the current internal fit parameters.
+     *
+     * @param freq The frequency at which to calculate the steady state.
+     * @return The steady state polarization.
+     */
+    double steady_state(double freq) const;
 };
 } // namespace polsim
 
