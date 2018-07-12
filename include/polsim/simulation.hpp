@@ -18,6 +18,11 @@ namespace polsim
 constexpr double ELEM_CHARGE = 1.602176662e-19;
 /// Pi.
 constexpr double PI = 3.1415926;
+/**
+ * The fraction of the total number of beam electrons that are transferred to
+ * the target.
+ */
+constexpr double BEAM_FRACTION = 0.01;
 
 /**
  * @brief The rate at which the fit parameter M1 changes with respect to dose.
@@ -34,7 +39,7 @@ constexpr double FIT_M2_RATE = -3.8e-15;
 /// The same as ::FIT_M1_COEFF, but for M2.
 constexpr double FIT_M2_COEFF = -0.065;
 /// The (linear) rate at which the fit parameter A changes with respect to dose.
-constexpr double FIT_A_COEFF = -0.5e-14;
+constexpr double FIT_A_COEFF = -1.386294e-16;
 
 /**
  * @brief Thermal randomness fraction.
@@ -277,6 +282,6 @@ private:
 	 */
 	double steady_state(double freq) const;
 };
-}
+} // namespace polsim
 
 #endif

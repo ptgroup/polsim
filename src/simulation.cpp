@@ -136,7 +136,8 @@ void Simulation::time_step(double t)
 	// Recall the exponential change of M1 and M2 described in the
 	// documentation.
 	const double delta_dose =
-	    (this->system.beam_current * 1e-9 / ELEM_CHARGE) * t;
+	    BEAM_FRACTION * (this->system.beam_current * 1e-9 / ELEM_CHARGE) *
+	    t;
 	this->fit_params.m1 += FIT_M1_COEFF * FIT_M1_RATE * delta_dose *
 	                       exp(FIT_M1_RATE * this->dose);
 	this->fit_params.m2 += FIT_M2_COEFF * FIT_M2_RATE * delta_dose *
@@ -193,4 +194,4 @@ double Simulation::steady_state(double freq) const
 	       (this->t1e * (2 + alpha + beta) +
 	        this->c * this->t1n * (alpha + beta + 2 * alpha * beta));
 }
-}
+} // namespace polsim
