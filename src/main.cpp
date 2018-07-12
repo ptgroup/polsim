@@ -13,7 +13,6 @@ int main()
 	constexpr auto start = 140.0;
 	auto controller = StandardController<3>{Pdp{Simulation{start}}};
 	auto perfect = PerfectController{Pdp{Simulation{start}}};
-	auto experimental = ExperimentalController<3>{Pdp{Simulation{start}}};
 
 	constexpr auto steps = 50;
 
@@ -24,10 +23,6 @@ int main()
 	cout << "Standard:" << endl;
 	for (auto i = 0; i < steps; i++)
 		cout << controller.step() << endl;
-
-	cout << "Experimental:" << endl;
-	for (auto i = 0; i < steps; i++)
-		cout << experimental.step() << endl;
 
 	return 0;
 }

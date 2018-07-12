@@ -74,49 +74,10 @@ public:
  * direction.
  *
  * @tparam n_points The number of data points to take per step (must be at least
- * 2).
- */
-template <unsigned n_points>
-class StandardController : public Controller
-{
-	static_assert(n_points >= 2, "Must use at least 2 points per step");
-
-	/// The minimum step size.
-	constexpr static double MIN_STEP_SIZE = 0.001;
-	/// The fraction by which to decrease step size on direction change.
-	constexpr static double STEP_SIZE_REDUCE = 0.8;
-
-	/// The last rate collected by this controller.
-	double last_rate = 0;
-	/// The frequency step size (GHz), as an absolute value.
-	double step_size;
-	/// The direction (the sign of the step size).
-	double direction = 1.0;
-
-public:
-	/**
-	 * @brief Constructs a new controller.
-	 *
-	 * @param pdp The underlying PDP simulation.
-	 * @param step_size The initial step size to use (in GHz).
-	 * @param seek_positive Whether to seek positive polarization.
-	 */
-	StandardController(Pdp pdp, double step_size = 0.05,
-	                   bool seek_positive = true);
-
-	Data step() override;
-};
-
-#include "StandardController.tpp"
-
-/**
- * @brief An experimental motor controller.
- *
- * @tparam n_points The number of data points to take per step (must be at least
  * 3).
  */
 template <unsigned n_points>
-class ExperimentalController : public Controller
+class StandardController : public Controller
 {
 	static_assert(n_points >= 3, "Must use at least 3 points per step");
 
@@ -140,13 +101,13 @@ public:
 	 * @param step_size The initial step size to use (in GHz).
 	 * @param seek_positive Whether to seek positive polarization.
 	 */
-	ExperimentalController(Pdp pdp, double step_size = 0.05,
-	                       bool seek_positive = true);
+	StandardController(Pdp pdp, double step_size = 0.05,
+	                   bool seek_positive = true);
 
 	Data step() override;
 };
 
-#include "ExperimentalController.tpp"
+#include "StandardController.tpp"
 
 /**
  * @brief A perfect motor controller.
