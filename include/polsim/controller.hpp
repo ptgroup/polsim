@@ -41,6 +41,7 @@ public:
      * @param seek_positive Whether to seek positive polarization.
      */
     Controller(Pdp pdp, bool seek_positive = true);
+    virtual ~Controller() = default;
 
     /**
      * @brief Performs a single step of the algorithm.
