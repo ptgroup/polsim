@@ -10,45 +10,48 @@
 template <unsigned n_points>
 StandardController<n_points>::StandardController(Pdp pdp, double step_size,
                                                  bool seek_positive)
-    : Controller(pdp, seek_positive), step_size(step_size)
+    : NPointController<n_points>(pdp, step_size, seek_positive)
 {
 }
 
 template <unsigned n_points>
-Data StandardController<n_points>::step()
+typename NPointController<n_points>::Decision
+StandardController<n_points>::make_decision(
+    const std::array<Data, n_points> &data)
 {
-    // Collect the specified number of data points.
-    auto data = std::vector<Data>{};
-    for (auto i = 0U; i < n_points; i++) {
-        data.push_back(pdp.take_data());
+    double k_avg = 0.0;
+
+    for (unsigned i = 2; i < data.size(); i++) {
+        const auto t0 = data[i - 2].t, t1 = data[i - 1].t, t2 = data[i].t;
+        const auto p0 = data[i - 2].pn, p1 = data[i - 1].pn, p2 = data[i].pn;
+        const auto c0 = p0 / ((t0 - t1) * (t0 - t2)),
+                   c1 = p1 / ((t1 - t0) * (t1 - t2)),
+                   c2 = p2 / ((t2 - t0) * (t2 - t1));
+        const auto pn_prime = [=](double t) {
+            return c0 * (2 * t - t1 - t2) + c1 * (2 * t - t0 - t2) +
+                   c2 * (2 * t - t0 - t1);
+        };
+
+        k_avg += pn_prime(t1);
     }
-    const auto last = data.back();
-    const auto first_t = data.front().t;
-    std::for_each(data.begin(), data.end(),
-                  [&](auto &point) { point.t -= first_t; });
 
-    const auto t0 = data[0].t, t1 = data[1].t, t2 = data[2].t;
-    const auto p0 = data[0].pn, p1 = data[1].pn, p2 = data[2].pn;
-    const auto c0 = p0 / ((t0 - t1) * (t0 - t2)),
-               c1 = p1 / ((t1 - t0) * (t1 - t2)),
-               c2 = p2 / ((t2 - t0) * (t2 - t1));
-    const auto pn_prime = [=](double t) {
-        return c0 * (2 * t - t1 - t2) + c1 * (2 * t - t0 - t2) +
-               c2 * (2 * t - t0 - t1);
-    };
+    k_avg /= data.size() - 2;
 
-    const auto k = pn_prime(t1);
-
-    // Compare the rate to the last one and move accordingly
-    if (last_k != 0 && fabs(k / last_k) < 0.8) {
-        this->step_size *= STEP_SIZE_REDUCE;
-        this->direction *= -1.0;
-        // We shouldn't go below a certain step size.
-        if (this->step_size < MIN_STEP_SIZE)
-            this->step_size = MIN_STEP_SIZE;
+    // We negate the rates if we're seeking negative to make the calculations
+    // easier (no need for separate cases).
+    const auto k_before = this->seek_positive ? last_k : -last_k;
+    const auto k_after = this->seek_positive ? k_avg : -k_avg;
+    using Decision = typename NPointController<n_points>::Decision;
+    Decision decision;
+    if (k_before <= 0.0 || k_after <= 0.0) {
+        decision = k_after >= k_before ? Decision::KEEP_DIRECTION
+                                       : Decision::SWITCH_DIRECTION;
+    } else {
+        decision = fabs(k_after / k_before) >= GOOD_RATIO
+                       ? Decision::KEEP_DIRECTION
+                       : Decision::SWITCH_DIRECTION;
     }
-    this->pdp.set_freq(data.back().freq + this->direction * this->step_size);
-    last_k = k;
 
-    return last;
+    last_k = k_avg;
+    return decision;
 }

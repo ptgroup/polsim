@@ -11,6 +11,7 @@
 #include "pdp.hpp"
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <list>
 #include <numeric>
@@ -63,6 +64,48 @@ public:
 };
 
 /**
+ * @brief A controller that uses a fixed number of data points on each step.
+ *
+ * @tparam n_points The number of data points to take per step.
+ */
+template <unsigned n_points>
+class NPointController : public Controller
+{
+    /// The minimum step size.
+    constexpr static double MIN_STEP_SIZE = 0.001;
+    /// The fraction by which to decrease step size on direction change.
+    constexpr static double STEP_SIZE_REDUCE = 0.8;
+    /// The frequency step size (GHz).
+    double step_size;
+    /// The direction (the sign of the step size).
+    double direction = 1.0;
+
+protected:
+    enum class Decision { NO_MOTION, KEEP_DIRECTION, SWITCH_DIRECTION };
+
+    /**
+     * @brief Given the data points for the current step, return what to do
+     * next.
+     */
+    virtual Decision make_decision(const std::array<Data, n_points> &data) = 0;
+
+public:
+    /**
+     * @brief Constructs a new controller.
+     *
+     * @param pdp The underlying PDP simulation.
+     * @param step_size The initial step size to use (in GHz).
+     * @param seek_positive Whether to seek positive polarization.
+     */
+    NPointController(Pdp pdp, double step_size = 0.05,
+                     bool seek_positive = true);
+
+    Data step() override;
+};
+
+#include "NPointController.tpp"
+
+/**
  * @brief The "standard" motor controller.
  *
  * This motor controller uses a simple "rate comparison" algorithm; that is, it
@@ -76,21 +119,18 @@ public:
  * 3).
  */
 template <unsigned n_points>
-class StandardController : public Controller
+class StandardController : public NPointController<n_points>
 {
     static_assert(n_points >= 3, "Must use at least 3 points per step");
 
-    /// The minimum step size.
-    constexpr static double MIN_STEP_SIZE = 0.001;
-    /// The fraction by which to decrease step size on direction change.
-    constexpr static double STEP_SIZE_REDUCE = 0.8;
-
+    /// The "good" rate ratio threshold.
+    constexpr static double GOOD_RATIO = 0.8;
     /// The last k value calculated.
     double last_k = 0;
-    /// The frequency step size (GHz).
-    double step_size;
-    /// The direction (the sign of the step size).
-    double direction = 1.0;
+
+protected:
+    typename NPointController<n_points>::Decision
+    make_decision(const std::array<Data, n_points> &data) override;
 
 public:
     /**
@@ -102,8 +142,6 @@ public:
      */
     StandardController(Pdp pdp, double step_size = 0.05,
                        bool seek_positive = true);
-
-    Data step() override;
 };
 
 #include "StandardController.tpp"
