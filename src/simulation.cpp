@@ -51,6 +51,8 @@ void Simulation::run_for(double t, double step)
     const double end_t = this->t + t;
     while (this->t < end_t)
         this->time_step(step);
+    if (t > 100.0)
+        std::cout << fit_params.a << std::endl;
 }
 
 void Simulation::anneal(double t, double temperature)
@@ -104,7 +106,8 @@ void Simulation::time_step(double t)
         this->system.temperature + 0.25 * this->system.beam_current / 100;
 
     // Increase phi linearly.
-    const double k_phi = (this->system.beam_current - 30) / 1e8;
+    // const double k_phi = (this->system.beam_current - 30) / 1e8;
+    const double k_phi = 0;
 
     // Calculate convenience constants
     const double A = -this->t1e / this->t1n -
@@ -140,7 +143,7 @@ void Simulation::time_step(double t)
         FIT_M1_COEFF * FIT_M1_RATE * delta_dose * exp(FIT_M1_RATE * this->dose);
     this->fit_params.m2 +=
         FIT_M2_COEFF * FIT_M2_RATE * delta_dose * exp(FIT_M2_RATE * this->dose);
-    this->fit_params.a += FIT_A_COEFF * delta_dose * this->fit_params.a;
+    this->fit_params.a += FIT_A_RATE * delta_dose * this->fit_params.a;
     this->dose += (this->system.beam_current * 1e-9 / ELEM_CHARGE) * t;
 
     // Calculate new transition rates

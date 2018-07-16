@@ -24,5 +24,12 @@ int main()
     for (auto i = 0; i < steps; i++)
         cout << controller.step() << endl;
 
+    auto sim = Simulation{140.1};
+    sim.run_for(3000);
+    cout << sim.take_data() << endl;
+    sim.system_ref().beam_on();
+    sim.run_for(3600);
+    cout << sim.take_data() << endl;
+
     return 0;
 }
