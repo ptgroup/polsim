@@ -74,8 +74,16 @@ StandardController<n_points>::make_decision_polarization(
                                      [&](auto a, auto b) { return a + b.pn; }) /
                      data.size();
     using Decision = typename NPointController<n_points>::Decision;
-    const auto decision =
-        avg >= last_pol ? Decision::KEEP_DIRECTION : Decision::SWITCH_DIRECTION;
+    const auto borders = std::minmax_element(
+        data.begin(), data.end(), [&](auto a, auto b) { return a.pn < b.pn; });
+    const auto range = borders.second->pn - borders.first->pn;
+    Decision decision;
+    if (range > STEADY_POL_SPREAD) {
+        decision = avg >= last_pol ? Decision::KEEP_DIRECTION
+                                   : Decision::SWITCH_DIRECTION;
+    } else {
+        decision = Decision::NO_MOTION;
+    }
     last_pol = avg;
 
     return decision;

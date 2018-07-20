@@ -127,6 +127,8 @@ class StandardController : public NPointController<n_points>
     constexpr static double ALGO_SWITCH_TIME = 600.0;
     /// The "good" rate ratio threshold.
     constexpr static double GOOD_RATIO = 0.8;
+    /// The polarization spread to be considered "steady".
+    constexpr static double STEADY_POL_SPREAD = 0.002;
     /// The last k value calculated.
     double last_k = 0.0;
     /// The last polarization value collected.
