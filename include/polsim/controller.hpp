@@ -123,14 +123,28 @@ class StandardController : public NPointController<n_points>
 {
     static_assert(n_points >= 3, "Must use at least 3 points per step");
 
+    /// The time (in seconds) at which to switch algorithms.
+    constexpr static double ALGO_SWITCH_TIME = 600.0;
     /// The "good" rate ratio threshold.
     constexpr static double GOOD_RATIO = 0.8;
     /// The last k value calculated.
-    double last_k = 0;
+    double last_k = 0.0;
+    /// The last polarization value collected.
+    double last_pol = 0.0;
+    /// Whether to seek using polarization values.
+    bool seek_pol = false;
 
 protected:
     typename NPointController<n_points>::Decision
     make_decision(const std::array<Data, n_points> &data) override;
+
+    /// Makes the decision based on rate values.
+    typename NPointController<n_points>::Decision
+    make_decision_rate(const std::array<Data, n_points> &data);
+
+    /// Makes the decision based on polarization values.
+    typename NPointController<n_points>::Decision
+    make_decision_polarization(const std::array<Data, n_points> &data);
 
 public:
     /**
@@ -142,6 +156,8 @@ public:
      */
     StandardController(Pdp pdp, double step_size = 0.05,
                        bool seek_positive = true);
+
+    Data step() override;
 };
 
 #include "StandardController.tpp"

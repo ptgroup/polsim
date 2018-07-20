@@ -19,6 +19,15 @@ typename NPointController<n_points>::Decision
 StandardController<n_points>::make_decision(
     const std::array<Data, n_points> &data)
 {
+    return seek_pol ? make_decision_polarization(data)
+                    : make_decision_rate(data);
+}
+
+template <unsigned n_points>
+typename NPointController<n_points>::Decision
+StandardController<n_points>::make_decision_rate(
+    const std::array<Data, n_points> &data)
+{
     double k_avg = 0.0;
 
     for (unsigned i = 2; i < data.size(); i++) {
@@ -54,4 +63,30 @@ StandardController<n_points>::make_decision(
 
     last_k = k_avg;
     return decision;
+}
+
+template <unsigned n_points>
+typename NPointController<n_points>::Decision
+StandardController<n_points>::make_decision_polarization(
+    const std::array<Data, n_points> &data)
+{
+    const auto avg = std::accumulate(data.begin(), data.end(), 0,
+                                     [&](auto a, auto b) { return a + b.pn; }) /
+                     data.size();
+    using Decision = typename NPointController<n_points>::Decision;
+    const auto decision =
+        avg >= last_pol ? Decision::KEEP_DIRECTION : Decision::SWITCH_DIRECTION;
+    last_pol = avg;
+
+    return decision;
+}
+
+template <unsigned n_points>
+Data StandardController<n_points>::step()
+{
+    const auto data = this->NPointController<n_points>::step();
+    if (data.t > ALGO_SWITCH_TIME) {
+        seek_pol = true;
+    }
+    return data;
 }
