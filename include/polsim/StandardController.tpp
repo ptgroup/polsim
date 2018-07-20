@@ -70,7 +70,7 @@ typename NPointController<n_points>::Decision
 StandardController<n_points>::make_decision_polarization(
     const std::array<Data, n_points> &data)
 {
-    const auto avg = std::accumulate(data.begin(), data.end(), 0,
+    const auto avg = std::accumulate(data.begin(), data.end(), 0.0,
                                      [&](auto a, auto b) { return a + b.pn; }) /
                      data.size();
     using Decision = typename NPointController<n_points>::Decision;
