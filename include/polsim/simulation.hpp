@@ -18,11 +18,6 @@ namespace polsim
 constexpr double ELEM_CHARGE = 1.602176662e-19;
 /// Pi.
 constexpr double PI = 3.1415926;
-/**
- * The fraction of the total number of beam electrons that are transferred to
- * the target.
- */
-constexpr double BEAM_FRACTION = 0.01;
 
 /**
  * @brief The rate at which the fit parameter M1 changes with respect to dose.

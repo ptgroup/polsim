@@ -57,7 +57,8 @@ void Simulation::run_for(double t, double step)
     while (this->t < end_t)
         time_step(step);
     if (t > 100.0)
-        std::cout << fit_params.a << std::endl;
+        std::cout << fit_params.a << " " << std::scientific << dose
+                  << std::fixed << std::endl;
 }
 
 void Simulation::anneal(double t, double temperature)
@@ -111,8 +112,7 @@ void Simulation::time_step(double t)
         system.temperature + 0.25 * system.beam_current / 100;
 
     // Increase phi linearly.
-    // const double k_phi = (this->system.beam_current - 30) / 1e8;
-    const double k_phi = 0;
+    const double k_phi = 5e-9 * (system.beam_current / 100.0);
 
     // Calculate convenience constants
     const double A = -fit_params.t1e / fit_params.t1n -
@@ -131,8 +131,6 @@ void Simulation::time_step(double t)
     // Update temperature and phi
     set_temperature(temperature + t * k_temp * (temp_ss - temperature));
     phi += t * k_phi;
-    if (phi < 0)
-        phi = 0;
     // Update C
     fit_params.c += IRRADIATION_FACTOR * system.beam_current * t;
 
@@ -140,14 +138,13 @@ void Simulation::time_step(double t)
     // it.
     // Recall the exponential change of M1 and M2 described in the
     // documentation.
-    const double delta_dose =
-        BEAM_FRACTION * (system.beam_current * 1e-9 / ELEM_CHARGE) * t;
+    const double delta_dose = (system.beam_current * 1e-9 / ELEM_CHARGE) * t;
     fit_params.m1 +=
         FIT_M1_COEFF * FIT_M1_RATE * delta_dose * exp(FIT_M1_RATE * dose);
     fit_params.m2 +=
         FIT_M2_COEFF * FIT_M2_RATE * delta_dose * exp(FIT_M2_RATE * dose);
     fit_params.a += FIT_A_RATE * delta_dose * fit_params.a;
-    dose += (system.beam_current * 1e-9 / ELEM_CHARGE) * t;
+    dose += delta_dose;
 
     // Calculate new transition rates
     update_transition_rates();
