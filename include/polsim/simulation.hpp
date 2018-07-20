@@ -85,20 +85,9 @@ struct FitParameters {
     double t1n;
     /// The ratio of electrons to nuclei.
     double c;
-};
 
-constexpr FitParameters ND3 = {0.572086, 0.0835606, 140.189,    140.5,
-                               0.03,     1500.0,    0.000136073};
-constexpr FitParameters NEW_PRO = {18.72086, 0.0835606, 140.19,     140.455,
-                                   0.03,     1500.0,    0.000336073};
-constexpr FitParameters NH3 = {13.97209, 0.083561, 140.195,    140.486,
-                               0.03,     1500.0,   0.000336073};
-constexpr FitParameters SHARP = {0.1,  0.023561, 140.19,     140.455,
-                                 0.03, 1500.0,   0.000936073};
-constexpr FitParameters TEST = {0.5,  0.04,   140.18, 140.48,
-                                0.03, 1500.0, 0.0002};
-constexpr FitParameters TEST2 = {0.572086, 0.0835606, 140.286,    140.486,
-                                 0.03,     1500.0,    0.000136073};
+    static const FitParameters ND3, NEW_PRO, NH3, SHARP, TEST, TEST2;
+};
 
 /**
  * @brief A single observable data point.
@@ -130,10 +119,16 @@ class System
     double temperature = 1;
     /// Beam current (nA).
     double beam_current = 0;
+    /// The fit parameters currently in use.
+    FitParameters fit_params;
 
 public:
-    System() = default;
+    System(FitParameters fit_params = FitParameters::NH3);
 
+    /**
+     * @brief Set the fit parameters.
+     */
+    void set_fit_params(FitParameters params);
     /**
      * @brief Sets the system temperature.
      *
@@ -165,9 +160,6 @@ class Simulation
 {
     // The perfect controller knows everything
     friend class PerfectController;
-
-    /// The fit parameters currently in use.
-    FitParameters fit_params;
 
     /// The underlying system.
     System system;
@@ -201,7 +193,7 @@ public:
      * @param freq The initial frequency.
      * @param fit_params The fit parameters to use.
      */
-    Simulation(double freq, FitParameters fit_params = NEW_PRO);
+    Simulation(double freq, FitParameters fit_params = FitParameters::NH3);
 
     /**
      * @brief Returns observable data readings.
@@ -213,10 +205,6 @@ public:
      * @return A reference to the underlying system.
      */
     System &system_ref();
-    /**
-     * @brief Set the fit parameters.
-     */
-    void set_fit_params(FitParameters params);
     /**
      * @brief Sets the frequency.
      *

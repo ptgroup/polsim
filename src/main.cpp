@@ -10,7 +10,7 @@ int main()
     using std::cout;
     using std::endl;
 
-    constexpr auto start = 140.0;
+    constexpr auto start = 140.1;
     auto controller = StandardController<3>{Pdp{Simulation{start}}};
     auto perfect = PerfectController{Pdp{Simulation{start}}};
 
@@ -19,17 +19,16 @@ int main()
     cout << "Perfect:" << endl;
     for (auto i = 0; i < 3 * steps; i++)
         cout << perfect.step() << endl;
+    perfect.system_ref().set_fit_params(FitParameters::SHARP);
+    for (auto i = 0; i < 3 * steps; i++)
+        cout << perfect.step() << endl;
 
     cout << "Standard:" << endl;
     for (auto i = 0; i < steps; i++)
         cout << controller.step() << endl;
-
-    auto sim = Simulation{140.1};
-    sim.run_for(3000);
-    cout << sim.take_data() << endl;
-    sim.system_ref().beam_on();
-    sim.run_for(3 * 3600);
-    cout << sim.take_data() << endl;
+    controller.system_ref().set_fit_params(FitParameters::SHARP);
+    for (auto i = 0; i < steps; i++)
+        cout << controller.step() << endl;
 
     return 0;
 }
