@@ -3,8 +3,15 @@ namespace polsim
 template <unsigned n_points>
 NPointController<n_points>::NPointController(Pdp pdp, double step_size,
                                              bool seek_positive)
-    : Controller(pdp, seek_positive), step_size(step_size)
+    : Controller(pdp, seek_positive), initial_step_size(step_size),
+      step_size(step_size)
 {
+}
+
+template <unsigned n_points>
+void NPointController<n_points>::reseek()
+{
+    step_size = initial_step_size;
 }
 
 template <unsigned n_points>

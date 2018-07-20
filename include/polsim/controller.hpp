@@ -75,6 +75,8 @@ class NPointController : public Controller
     constexpr static double MIN_STEP_SIZE = 0.001;
     /// The fraction by which to decrease step size on direction change.
     constexpr static double STEP_SIZE_REDUCE = 0.8;
+    /// The initial step size (GHz).
+    double initial_step_size;
     /// The frequency step size (GHz).
     double step_size;
     /// The direction (the sign of the step size).
@@ -100,6 +102,10 @@ public:
     NPointController(Pdp pdp, double step_size = 0.05,
                      bool seek_positive = true);
 
+    /**
+     * @brief Resets the step size.
+     */
+    virtual void reseek();
     Data step() override;
 };
 
@@ -125,12 +131,21 @@ class StandardController : public NPointController<n_points>
     constexpr static double ALGO_SWITCH_TIME = 600.0;
     /// The "good" rate ratio threshold.
     constexpr static double GOOD_RATIO = 0.8;
+    /// The number of bad polarization values to accept before reseeking.
+    constexpr static unsigned RESEEK_AFTER = 4;
     /// The polarization spread to be considered "steady".
     constexpr static double STEADY_POL_SPREAD = 0.002;
+
+    /// The "countdown timer" (in seconds) to switch algorithms to polarization.
+    double algo_switch_countdown = ALGO_SWITCH_TIME;
+    /// The number of bad polarization values collected so far.
+    unsigned bad_pols = 0;
     /// The last k value calculated.
     double last_k = 0.0;
     /// The last polarization value collected.
     double last_pol = 0.0;
+    /// The time of the last data point.
+    double last_time = 0.0;
     /// Whether to seek using polarization values.
     bool seek_pol = false;
 
@@ -157,6 +172,7 @@ public:
     StandardController(Pdp pdp, double step_size = 0.05,
                        bool seek_positive = true);
 
+    void reseek() override;
     Data step() override;
 };
 

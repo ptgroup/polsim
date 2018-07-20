@@ -79,10 +79,22 @@ StandardController<n_points>::make_decision_polarization(
     const auto range = borders.second->pn - borders.first->pn;
     Decision decision;
     if (range > STEADY_POL_SPREAD) {
-        decision = avg >= last_pol ? Decision::KEEP_DIRECTION
-                                   : Decision::SWITCH_DIRECTION;
+        if (avg >= last_pol) {
+            decision = Decision::KEEP_DIRECTION;
+            bad_pols = 0;
+        } else {
+            decision = Decision::SWITCH_DIRECTION;
+            bad_pols++;
+            if (bad_pols == RESEEK_AFTER) {
+                this->reseek();
+                bad_pols = 0;
+            }
+        }
     } else {
         decision = Decision::NO_MOTION;
+        // I make a conscious decision here neither to increase bad_pols or
+        // reset it; I may choose to reset it at some point if it seems
+        // necessary/useful.
     }
     last_pol = avg;
 
@@ -90,12 +102,26 @@ StandardController<n_points>::make_decision_polarization(
 }
 
 template <unsigned n_points>
+void StandardController<n_points>::reseek()
+{
+    this->NPointController<n_points>::reseek();
+    // Revert to rate seek and restart countdown.
+    seek_pol = false;
+    algo_switch_countdown = ALGO_SWITCH_TIME;
+}
+
+template <unsigned n_points>
 Data StandardController<n_points>::step()
 {
     const auto data = this->NPointController<n_points>::step();
-    if (data.t > ALGO_SWITCH_TIME) {
+    if (algo_switch_countdown > 0.0) {
+        algo_switch_countdown -= data.t - last_time;
+    }
+    if (algo_switch_countdown <= 0.0) {
         seek_pol = true;
     }
+    last_time = data.t;
+
     return data;
 }
 } // namespace polsim

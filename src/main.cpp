@@ -19,6 +19,7 @@ int main()
     cout << "Perfect:" << endl;
     for (auto i = 0; i < 3 * steps; i++)
         cout << perfect.step() << endl;
+    cout << "Switching to 'sharp'" << endl;
     perfect.system_ref().set_fit_params(FitParameters::SHARP);
     for (auto i = 0; i < 3 * steps; i++)
         cout << perfect.step() << endl;
@@ -26,6 +27,7 @@ int main()
     cout << "Standard:" << endl;
     for (auto i = 0; i < steps; i++)
         cout << controller.step() << endl;
+    cout << "Switching to 'sharp'" << endl;
     controller.system_ref().set_fit_params(FitParameters::SHARP);
     for (auto i = 0; i < steps; i++)
         cout << controller.step() << endl;
