@@ -12,9 +12,9 @@ void System::set_temperature(double temperature)
     this->temperature = temperature;
 }
 
-void System::beam_on(double current) { this->beam_current = current; }
+void System::beam_on(double current) { beam_current = current; }
 
-void System::beam_off() { this->beam_current = 0; }
+void System::beam_off() { beam_current = 0; }
 
 std::ostream &operator<<(std::ostream &out, const Data &data)
 {
@@ -22,35 +22,40 @@ std::ostream &operator<<(std::ostream &out, const Data &data)
     return out << (int64_t)data.t << "," << data.pn << "," << data.freq;
 }
 
-Simulation::Simulation(double freq)
+Simulation::Simulation(double freq, FitParameters fit_params)
 {
-    this->set_freq(freq);
+    set_freq(freq);
     // Make sure pe0 gets initialized
-    this->set_temperature(this->system.temperature);
-    this->update_transition_rates();
-    this->rng.seed(std::random_device{}());
+    set_temperature(system.temperature);
+    set_fit_params(fit_params);
+    rng.seed(std::random_device{}());
 }
 
 Data Simulation::take_data() const
 {
-    return {this->t, this->pn,          this->pe,  this->freq,
-            this->c, this->temperature, this->dose};
+    return {t, pn, pe, freq, fit_params.c, temperature, dose};
 }
 
-System &Simulation::system_ref() { return this->system; }
+System &Simulation::system_ref() { return system; }
+
+void Simulation::set_fit_params(FitParameters params)
+{
+    fit_params = params;
+    update_transition_rates();
+}
 
 void Simulation::set_freq(double frequency)
 {
-    this->freq = frequency;
+    freq = frequency;
     // Make sure transition rates get updated
-    this->update_transition_rates();
+    update_transition_rates();
 }
 
 void Simulation::run_for(double t, double step)
 {
     const double end_t = this->t + t;
     while (this->t < end_t)
-        this->time_step(step);
+        time_step(step);
     if (t > 100.0)
         std::cout << fit_params.a << std::endl;
 }
@@ -58,14 +63,14 @@ void Simulation::run_for(double t, double step)
 void Simulation::anneal(double t, double temperature)
 {
     // Reset phi (remove negative effects of irradiation)
-    this->phi = 0;
+    phi = 0;
     // Maybe change T1n?
-    this->t1n *= 0.8;
+    fit_params.t1n *= 0.8;
 
-    auto temp_tmp = this->system.temperature;
-    this->system.set_temperature(temperature);
-    this->run_for(t);
-    this->system.set_temperature(temp_tmp);
+    auto temp_tmp = system.temperature;
+    system.set_temperature(temperature);
+    run_for(t);
+    system.set_temperature(temp_tmp);
 }
 
 double Simulation::find_optimal_freq(bool negative) const
@@ -89,7 +94,7 @@ double Simulation::find_optimal_freq(bool negative) const
 void Simulation::set_temperature(double temperature)
 {
     // The parameter Pe0 depends on temperature
-    this->pe0 = -tanh(2 / temperature);
+    pe0 = -tanh(2 / temperature);
     this->temperature = temperature;
 }
 
@@ -103,75 +108,70 @@ void Simulation::time_step(double t)
     // anneals occur at constant temperature)
     const double k_temp = 1;
     const double temp_ss =
-        this->system.temperature + 0.25 * this->system.beam_current / 100;
+        system.temperature + 0.25 * system.beam_current / 100;
 
     // Increase phi linearly.
     // const double k_phi = (this->system.beam_current - 30) / 1e8;
     const double k_phi = 0;
 
     // Calculate convenience constants
-    const double A = -this->t1e / this->t1n -
-                     (this->c / 2) * (this->alpha + this->beta) - this->phi;
-    const double B = (this->c / 2) * (this->alpha - this->beta);
-    const double C = (this->alpha - this->beta) / 2;
-    const double D = -1 - (this->alpha + this->beta) / 2;
+    const double A = -fit_params.t1e / fit_params.t1n -
+                     (fit_params.c / 2) * (alpha + beta) - phi;
+    const double B = (fit_params.c / 2) * (alpha - beta);
+    const double C = (alpha - beta) / 2;
+    const double D = -1 - (alpha + beta) / 2;
 
     // Calculate rates
-    const double pn_prime = (A * this->pn_raw + B * this->pe) / this->t1e;
-    const double pe_prime =
-        (C * this->pn_raw + D * this->pe + this->pe0) / this->t1e;
+    const double pn_prime = (A * pn_raw + B * pe) / fit_params.t1e;
+    const double pe_prime = (C * pn_raw + D * pe + pe0) / fit_params.t1e;
 
     // Update pn and pe using Euler's method
-    this->pn_raw += pn_prime * t;
-    this->pe += pe_prime * t;
+    pn_raw += pn_prime * t;
+    pe += pe_prime * t;
     // Update temperature and phi
-    this->set_temperature(this->temperature +
-                          t * k_temp * (temp_ss - this->temperature));
-    this->phi += t * k_phi;
-    if (this->phi < 0)
-        this->phi = 0;
+    set_temperature(temperature + t * k_temp * (temp_ss - temperature));
+    phi += t * k_phi;
+    if (phi < 0)
+        phi = 0;
     // Update C
-    this->c += IRRADIATION_FACTOR * this->system.beam_current * t;
+    fit_params.c += IRRADIATION_FACTOR * system.beam_current * t;
 
     // Update dose, along with the fit parameters M1 and M2, which depend on
     // it.
     // Recall the exponential change of M1 and M2 described in the
     // documentation.
     const double delta_dose =
-        BEAM_FRACTION * (this->system.beam_current * 1e-9 / ELEM_CHARGE) * t;
-    this->fit_params.m1 +=
-        FIT_M1_COEFF * FIT_M1_RATE * delta_dose * exp(FIT_M1_RATE * this->dose);
-    this->fit_params.m2 +=
-        FIT_M2_COEFF * FIT_M2_RATE * delta_dose * exp(FIT_M2_RATE * this->dose);
-    this->fit_params.a += FIT_A_RATE * delta_dose * this->fit_params.a;
-    this->dose += (this->system.beam_current * 1e-9 / ELEM_CHARGE) * t;
+        BEAM_FRACTION * (system.beam_current * 1e-9 / ELEM_CHARGE) * t;
+    fit_params.m1 +=
+        FIT_M1_COEFF * FIT_M1_RATE * delta_dose * exp(FIT_M1_RATE * dose);
+    fit_params.m2 +=
+        FIT_M2_COEFF * FIT_M2_RATE * delta_dose * exp(FIT_M2_RATE * dose);
+    fit_params.a += FIT_A_RATE * delta_dose * fit_params.a;
+    dose += (system.beam_current * 1e-9 / ELEM_CHARGE) * t;
 
     // Calculate new transition rates
-    this->update_transition_rates();
+    update_transition_rates();
     // Update time
     this->t += t;
     // Update "noisy pn"
-    this->pn = this->pn_noisy();
+    pn = pn_noisy();
 }
 
 void Simulation::update_transition_rates()
 {
-    auto rates = this->calc_transition_rates(this->freq);
-    this->alpha = rates.first;
-    this->beta = rates.second;
+    auto rates = calc_transition_rates(freq);
+    alpha = rates.first;
+    beta = rates.second;
 }
 
 std::pair<double, double> Simulation::calc_transition_rates(double freq) const
 {
     // Calculate from the Gaussian distributions
-    const double scale =
-        this->fit_params.a / (sqrt(2 * PI) * this->fit_params.s);
-    const double diff1 = freq - this->fit_params.m1;
-    const double diff2 = freq - this->fit_params.m2;
-    const double exp1 =
-        exp(-diff1 * diff1 / (2 * this->fit_params.s * this->fit_params.s));
-    const double exp2 =
-        exp(-diff2 * diff2 / (2 * this->fit_params.s * this->fit_params.s));
+    const double scale = fit_params.a / (sqrt(2 * PI) * fit_params.s);
+    const double diff1 = freq - fit_params.m1;
+    const double diff2 = freq - fit_params.m2;
+    const double exp1 = exp(-diff1 * diff1 / (2 * fit_params.s * fit_params.s));
+    const double exp2 = exp(-diff2 * diff2 / (2 * fit_params.s * fit_params.s));
 
     return std::make_pair(scale * exp2, scale * exp1);
 }
@@ -179,20 +179,20 @@ std::pair<double, double> Simulation::calc_transition_rates(double freq) const
 double Simulation::pn_noisy()
 {
     auto dist = std::uniform_real_distribution<double>{-1, 1};
-    const double THERMAL_NOISE = THERMAL_RANDOMNESS * dist(this->rng);
-    const double UNIFORM_NOISE = BASE_RANDOMNESS * dist(this->rng);
+    const double THERMAL_NOISE = THERMAL_RANDOMNESS * dist(rng);
+    const double UNIFORM_NOISE = BASE_RANDOMNESS * dist(rng);
 
-    return this->pn_raw * (1 + THERMAL_NOISE) + UNIFORM_NOISE;
+    return pn_raw * (1 + THERMAL_NOISE) + UNIFORM_NOISE;
 }
 
 double Simulation::steady_state(double freq) const
 {
-    auto rates = this->calc_transition_rates(freq);
+    auto rates = calc_transition_rates(freq);
     auto alpha = rates.first;
     auto beta = rates.second;
     // See Jeffries-optimal-frequency.nb for details
-    return this->c * this->t1n * (beta - alpha) /
-           (this->t1e * (2 + alpha + beta) +
-            this->c * this->t1n * (alpha + beta + 2 * alpha * beta));
+    return fit_params.c * fit_params.t1n * (beta - alpha) /
+           (fit_params.t1e * (2 + alpha + beta) +
+            fit_params.c * fit_params.t1n * (alpha + beta + 2 * alpha * beta));
 }
 } // namespace polsim

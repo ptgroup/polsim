@@ -77,14 +77,33 @@ constexpr double IRRADIATION_FACTOR = 1e-10;
  */
 struct FitParameters {
     /// The height of the distributions.
-    double a = 18.7208599999999983;
+    double a;
     /// The standard deviation.
-    double s = 0.0835606000000000;
+    double s;
     /// The mean of the beta distribution.
-    double m1 = 140.1899999999999980;
+    double m1;
     /// The mean of the alpha distribution.
-    double m2 = 140.4550000000000120;
+    double m2;
+    /// The electronic relaxation rate.
+    double t1e;
+    /// The nuclear relaxation rate.
+    double t1n;
+    /// The ratio of electrons to nuclei.
+    double c;
 };
+
+constexpr FitParameters ND3 = {0.572086, 0.0835606, 140.189,    140.5,
+                               0.03,     1500.0,    0.000136073};
+constexpr FitParameters NEW_PRO = {18.72086, 0.0835606, 140.19,     140.455,
+                                   0.03,     1500.0,    0.000336073};
+constexpr FitParameters NH3 = {13.97209, 0.083561, 140.195,    140.486,
+                               0.03,     1500.0,   0.000336073};
+constexpr FitParameters SHARP = {0.1,  0.023561, 140.19,     140.455,
+                                 0.03, 1500.0,   0.000936073};
+constexpr FitParameters TEST = {0.5,  0.04,   140.18, 140.48,
+                                0.03, 1500.0, 0.0002};
+constexpr FitParameters TEST2 = {0.572086, 0.0835606, 140.286,    140.486,
+                                 0.03,     1500.0,    0.000136073};
 
 /**
  * @brief A single observable data point.
@@ -158,9 +177,6 @@ class Simulation
     /// The underlying system.
     System system;
 
-    double t1n = 25 * 60;
-    double t1e = 0.03;
-
     /// Current time (in seconds).
     double t = 0;
     /// Frequency (GHz).
@@ -169,7 +185,6 @@ class Simulation
     double temperature;
 
     double alpha, beta;
-    double c = 0.000336073;
     double pe0;
     double phi = 0;
 
@@ -189,8 +204,9 @@ public:
      * @brief Constructs a Simulation.
      *
      * @param freq The initial frequency.
+     * @param fit_params The fit parameters to use.
      */
-    Simulation(double freq);
+    Simulation(double freq, FitParameters fit_params = NEW_PRO);
 
     /**
      * @brief Returns observable data readings.
@@ -202,6 +218,10 @@ public:
      * @return A reference to the underlying system.
      */
     System &system_ref();
+    /**
+     * @brief Set the fit parameters.
+     */
+    void set_fit_params(FitParameters params);
     /**
      * @brief Sets the frequency.
      *
