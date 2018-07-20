@@ -66,7 +66,7 @@ constexpr double BASE_RANDOMNESS = 0.002;
  * Multiplied by the beam current, this gives the rate of change of C over time
  * (C will drift when the beam is on).
  */
-constexpr double IRRADIATION_FACTOR = 1e-10;
+constexpr double IRRADIATION_FACTOR = 0.0;
 
 /**
  * @brief The fit parameters which are used to calculate alpha and beta.

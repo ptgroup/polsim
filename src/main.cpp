@@ -28,7 +28,7 @@ int main()
     sim.run_for(3000);
     cout << sim.take_data() << endl;
     sim.system_ref().beam_on();
-    sim.run_for(3600);
+    sim.run_for(10 * 3600);
     cout << sim.take_data() << endl;
 
     return 0;
