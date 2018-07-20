@@ -8,7 +8,7 @@
 #ifndef PDP_HPP
 #define PDP_HPP
 
-#include "simulation.hpp"
+#include "polsim/simulation.hpp"
 
 #include <random>
 

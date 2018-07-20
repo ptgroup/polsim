@@ -8,7 +8,7 @@
 #ifndef CONTROLLER_HPP
 #define CONTROLLER_HPP
 
-#include "pdp.hpp"
+#include "polsim/pdp.hpp"
 
 #include <algorithm>
 #include <array>
