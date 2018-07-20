@@ -212,8 +212,7 @@ public:
      * @brief Runs the simulation for the specified time.
      *
      * Note that if the given time is not a multiple of the time step, the
-     * simulation will actually run for longer than the specified time.
-     * Large
+     * simulation will actually run for longer than the specified time.  Large
      * time steps will lead to more inaccuracy in the simulated values.
      *
      * @param t The time (in seconds) to run the simulation.
@@ -250,8 +249,7 @@ private:
      * @brief Makes a single time step.
      *
      * This performs a single iteration of Euler's method using the solid
-     * effect
-     * equations, where the step size is the specified time.
+     * effect equations, where the step size is the specified time.
      *
      * @param t The time step to use.
      */
