@@ -103,8 +103,6 @@ public:
     Data step() override;
 };
 
-#include "NPointController.tpp"
-
 /**
  * @brief The "standard" motor controller.
  *
@@ -162,8 +160,6 @@ public:
     Data step() override;
 };
 
-#include "StandardController.tpp"
-
 /**
  * @brief A perfect motor controller.
  *
@@ -181,5 +177,8 @@ public:
     Data step() override;
 };
 } // namespace polsim
+
+#include "NPointController.tpp"
+#include "StandardController.tpp"
 
 #endif

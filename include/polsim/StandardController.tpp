@@ -5,8 +5,8 @@
  * @author Ian Johnson
  * @date June 30, 2017
  */
-#include "controller.hpp"
-
+namespace polsim
+{
 template <unsigned n_points>
 StandardController<n_points>::StandardController(Pdp pdp, double step_size,
                                                  bool seek_positive)
@@ -98,3 +98,4 @@ Data StandardController<n_points>::step()
     }
     return data;
 }
+} // namespace polsim

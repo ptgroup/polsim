@@ -1,5 +1,5 @@
-#include "controller.hpp"
-
+namespace polsim
+{
 template <unsigned n_points>
 NPointController<n_points>::NPointController(Pdp pdp, double step_size,
                                              bool seek_positive)
@@ -34,3 +34,4 @@ Data NPointController<n_points>::step()
 
     return data.back();
 }
+} // namespace polsim
